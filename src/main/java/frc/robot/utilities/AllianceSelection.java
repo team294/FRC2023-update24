@@ -4,6 +4,8 @@
 
 package frc.robot.utilities;
 
+import java.util.Optional;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -39,8 +41,15 @@ public class AllianceSelection {
 		SmartDashboard.putData("Alliance Selection", allianceChooser);
 
         // Set Alliance on Shuffleboard
-        setAlliance(DriverStation.getAlliance());
-        log.writeLogEcho(true, "Alliance Selection", "Initialize", "Alliance from DriverStation", alliance.name());
+        Optional<Alliance> ally = DriverStation.getAlliance();
+        if (ally.isPresent()) {
+            setAlliance(ally.get());
+            log.writeLogEcho(true, "Alliance Selection", "Initialize", "Alliance from DriverStation", alliance.name());
+        }
+        else {
+            setAlliance(Alliance.Blue);
+            log.writeLogEcho(true, "Alliance Selection", "Initialize", "DriverStation not present - default to Blue", alliance.name());
+        }
     }
 
     /**
@@ -76,7 +85,10 @@ public class AllianceSelection {
                 case Auto:
                     // Do not auto change alliance in Auto or Teleop mode
                     if (DriverStation.isDisabled()) {
-                        newAlliance = DriverStation.getAlliance();
+                        Optional<Alliance> ally = DriverStation.getAlliance();
+                        if (ally.isPresent()) {
+                            newAlliance = ally.get();
+                        }
                     }
                     break;
                 case Red:

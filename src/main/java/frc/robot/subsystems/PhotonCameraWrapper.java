@@ -27,7 +27,7 @@ public class PhotonCameraWrapper extends SubsystemBase {
   private Field field;
   private FileLog log;
   private boolean hasInit = false;
-  private Alliance currAlliance = Alliance.Invalid;
+  private Alliance currAlliance = Alliance.Blue;
   private int logRotationKey;
   private boolean fastLogging = false;
 
