@@ -341,7 +341,7 @@ public class AutoSelection {
 				posScore = MathBCR.translate(field.getFinalColumn(8), 0, 0.2);		// G5:  Move scoring location by 0.2m to better center cube
 				posEnd = new Pose2d( posCube.getTranslation(), posCube.getRotation().plus(Rotation2d.fromDegrees(-90)) );
 			}
-				
+			
 			autonomousCommand = new SequentialCommandGroup(
 				new WaitCommand(waitTime),
 				new DriveResetPose(posScoreInitial, true, driveTrain, log),
