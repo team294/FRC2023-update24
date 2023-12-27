@@ -68,23 +68,23 @@ public final class CTREConfigs {
     }
 
     // Configuration for elevator motor
-    public static final TalonFXConfiguration elevatorFXConfig;
-    static {
-        elevatorFXConfig = new TalonFXConfiguration();
+    // public static final TalonFXConfiguration elevatorFXConfig;
+    // static {
+        // elevatorFXConfig = new TalonFXConfiguration();
 
-        elevatorFXConfig.voltageCompSaturation = 12.0;
-        elevatorFXConfig.neutralDeadband = 0.0;
-        elevatorFXConfig.peakOutputForward = 1.0;       // up max output
-        elevatorFXConfig.peakOutputReverse = -1.0;      // down max output
-        elevatorFXConfig.openloopRamp = 0.3;        // 2019 elevator used 0.3
-        elevatorFXConfig.closedloopRamp = 0.3;      // Calibrate if using Talon PID (currently not being used)
+        // elevatorFXConfig.voltageCompSaturation = 12.0;
+        // elevatorFXConfig.neutralDeadband = 0.0;
+        // elevatorFXConfig.peakOutputForward = 1.0;       // up max output
+        // elevatorFXConfig.peakOutputReverse = -1.0;      // down max output
+        // elevatorFXConfig.openloopRamp = 0.3;        // 2019 elevator used 0.3
+        // elevatorFXConfig.closedloopRamp = 0.3;      // Calibrate if using Talon PID (currently not being used)
 
-        elevatorFXConfig.slot0.kP = 0.0;     // Calibrate if using Talon PID (currently not being used)
-        elevatorFXConfig.slot0.kI = 0.0;
-        elevatorFXConfig.slot0.kD = 0.0;
-        elevatorFXConfig.slot0.kF = 0.0;     // Use arbitrary FF instead
-        elevatorFXConfig.slot0.integralZone = 0.0;
-        elevatorFXConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
+        // elevatorFXConfig.slot0.kP = 0.0;     // Calibrate if using Talon PID (currently not being used)
+        // elevatorFXConfig.slot0.kI = 0.0;
+        // elevatorFXConfig.slot0.kD = 0.0;
+        // elevatorFXConfig.slot0.kF = 0.0;     // Use arbitrary FF instead
+        // elevatorFXConfig.slot0.integralZone = 0.0;
+        // elevatorFXConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
 
         // Supply current limit is typically used to prevent breakers from tripping.
         // elevatorFXConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration(
@@ -93,7 +93,7 @@ public final class CTREConfigs {
         // Stator current limit can be used to limit acceleration, torque, braking (when in brake mode), and motor heating.
         // elevatorFXConfig.statorCurrLimit = new StatorCurrentLimitConfiguration(
         //     enable, currentLimit, triggerThresholdCurrent, triggerThresholdTime);
-    }
+    // }
 
     // Configuration for wrist motor
     public static final TalonFXConfiguration wristFXConfig;
