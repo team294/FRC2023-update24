@@ -68,7 +68,6 @@ public final class Constants {
         public static final int CANIntake1 = 40;
         public static final int CANIntake2 = 15;
         public static final int CANManipulator = 43; 
-        public static final int CANConveyor = 47;
 
         // Digital IO ports
         public static final int DIOWristRevThroughBoreEncoder = 0;
@@ -275,7 +274,7 @@ public final class Constants {
         // -90 degrees = vertical = wrist is hanging "down" naturally due to gravity
         public enum WristAngle {
             lowerLimit(-138.0),      // CALIBRATED
-            loadIntake(-135.0),    // Conveyor gone so this is unnecesary currently, was -117.5
+            loadIntake(-135.0),    // CALIBRATED
             startConfig(-115.0),     // CALIBRATED
             loadHumanStation(10.0),      // CALIBRATED
             scoreLow(0.0),

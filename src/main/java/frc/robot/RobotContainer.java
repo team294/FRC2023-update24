@@ -65,7 +65,6 @@ public class RobotContainer {
   private final Manipulator manipulator = new Manipulator(log);
   private final Intake intake = new Intake(log);
   private final LED led = new LED();
-  // private final Conveyor conveyor = new Conveyor(log);
 
   // Define other utilities
   private final TrajectoryCache trajectoryCache = new TrajectoryCache(log);
@@ -179,11 +178,6 @@ public class RobotContainer {
     SmartDashboard.putData("LED Yellow", new LEDSetStrip(Color.kYellow, 1, led, log));
     SmartDashboard.putData("LED Purple", new LEDSetStrip(Color.kPurple, 1, led, log));
 
-    //Conveyor Commands
-    // SmartDashboard.putData("Conveyor Custom Percent", new ConveyorMove(conveyor, log));
-    // SmartDashboard.putData("Conveyor Run", new ConveyorMove(0.3, conveyor, log));
-    // SmartDashboard.putData("Conveyor Stop", new ConveyorMove(0, conveyor, log));
-
     // Intake Commands
     SmartDashboard.putData("Intake Stop", new IntakeStop(intake, log));
     SmartDashboard.putData("Intake Pick Up",new IntakeSetPercentOutput(.75, .35, intake, log));
@@ -284,7 +278,7 @@ public class RobotContainer {
     
     //x
     // xbX.onTrue(new ElevatorSetPosition(ElevatorPosition.bottom, elevator, log));
-    // Store elevator and wrist for traveling or pickup from conveyor
+    // Store elevator and wrist for traveling or pickup from intake
     xbX.onTrue(
       new ConditionalCommand(
         // Stow Elevator.  Schedule the elevator command separately, so this xbox button does not
@@ -321,7 +315,6 @@ public class RobotContainer {
     xbBack.onTrue(Commands.parallel(
       new ManipulatorStopMotor(manipulator, log),
       new IntakeStop(intake, log)
-      // new ConveyorMove(0, conveyor, log)
     )); 
 
     // start 
@@ -338,9 +331,7 @@ public class RobotContainer {
     xbPOVDown.onTrue(new ManipulatorSetPistonPosition(false, led, manipulator, log));
 
     // Left
-    // Sets elevator/wrist to stowed, turn on conveyor, turn on manipulator to load piece
     // xbPOVLeft.onTrue();
-    // xbPOVLeft.onTrue(new LoadPieceConveyor(elevator, wrist, manipulator, conveyor, log));
 
     // Right
     // Move elevator to loading station config and turn on manipulator to grab piece
