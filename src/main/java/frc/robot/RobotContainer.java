@@ -22,7 +22,6 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ScheduleCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -43,7 +42,6 @@ import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
 import frc.robot.utilities.TrajectoryCache.TrajectoryFacing;
-import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a

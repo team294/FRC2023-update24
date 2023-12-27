@@ -1,7 +1,6 @@
 package frc.robot.commands.sequences;
 
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import frc.robot.Constants.ManipulatorConstants;
 import frc.robot.Constants.SwerveConstants;
