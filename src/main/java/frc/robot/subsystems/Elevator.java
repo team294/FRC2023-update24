@@ -78,8 +78,8 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// elevatorMotorConfig.MotorOutput.DutyCycleNeutralDeadband = 0;  // Default = 0
 		// elevatorMotorConfig.MotorOutput.PeakForwardDutyCycle = 1.0;			// Default = 1.0.  We probably won't use duty-cycle control, since there is no longer voltage compensation
 		// elevatorMotorConfig.MotorOutput.PeakReverseDutyCycle = -1.0;			// Default = -1.0.  We probably won't use duty-cycle control, since there is no longer voltage compensation
-		elevatorVoltage.Voltage.PeakForwardVoltage = ElevatorConstants.voltageCompSaturation;
-		elevatorVoltage.Voltage.PeakReverseVoltage = -ElevatorConstants.voltageCompSaturation;
+		elevatorMotorConfig.Voltage.PeakForwardVoltage = ElevatorConstants.voltageCompSaturation;
+		elevatorMotorConfig.Voltage.PeakReverseVoltage = -ElevatorConstants.voltageCompSaturation;
 		elevatorMotorConfig.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.3;		// 0.3 seconds
 		// elevatorMotorConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.3; 		// Calibrate if using Talon PID (currently not being used)
 		// elevatorMotorConfig.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.3;	// Calibrate if using Talon PID (currently not being used)
