@@ -121,7 +121,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// from the Rio to the Talon and back to the Rio.  So, reading position could give the wrong value if
 		// we don't wait (random weird behavior).
 		// DO NOT GET RID OF THIS WITHOUT TALKING TO DON OR ROB.
-		// TODO verify if this is needed after migrating to Phoenix6.
+		// Verified that this is still needed after migrating to Phoenix6.
 		Wait.waitTime(250);
 
 		// start the elevator in manual mode unless it is properly zeroed
@@ -209,10 +209,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * @return between -1.0 (down) and 1.0 (up)
 	 */
 	public double getElevatorMotorPercentOutput() {
-		long startTime = System.currentTimeMillis();
-		elevatorDutyCycle.refresh();			// TODO verify that this is not a blocking call.
-		long endTime = System.currentTimeMillis();
-		System.out.println(buildString("Elevator duty cycle:  Delta (ms) = ", endTime-startTime, ".  Start = ", startTime, ".  End = ", endTime));
+		elevatorDutyCycle.refresh();			// Verified that this is not a blocking call.
 		return elevatorDutyCycle.getValueAsDouble();
 	}
 
@@ -275,15 +272,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		if (isElevatorAtLowerLimit()) {
 			stopElevator();			// Make sure Talon PID loop or motion profile won't move the robot to the last set position when we reset the enocder position
 
-			double startPos = getElevatorEncRotations();
-			long startTime = System.currentTimeMillis();
-			elevatorMotor.setPosition(0, 0.100);			// TODO verify that this is a blocking call and that the next read sees the zero.
-			double endPos = getElevatorEncRotations();
-			long endTime = System.currentTimeMillis();
-			System.out.println(buildString("Zero limit switch:  Delta (ms) = ", endTime-startTime, 
-				".  Time Start = ", startTime, ".  End = ", endTime,
-				".  Pos Start = ", startPos, ".  End = ", endPos));
-
+			elevatorMotor.setPosition(0, 0.100);			// Verified that this is a blocking call (typ ~6ms), but the next read may still not see the zeroed position.
 			elevCalibrated = true;
 
 			log.writeLog(true, subsystemName, "Calibrate and Zero Encoder", "checkAndZeroElevatorEnc");
@@ -302,10 +291,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * @return raw encoder reading, in pinion rotations (based on encoder zero being at zero position)
 	 */
 	public double getElevatorEncRotations() {
-		long startTime = System.currentTimeMillis();
-		elevatorEncoderPostion.refresh();			// TODO verify that this is not a blocking call.
-		long endTime = System.currentTimeMillis();
-		System.out.println(buildString("Elevator position:  Delta (ms) = ", endTime-startTime, ".  Start = ", startTime, ".  End = ", endTime, ".  pos = ", elevatorEncoderPostion.getValueAsDouble()));
+		elevatorEncoderPostion.refresh();			// Verified that this is not a blocking call.
 		return elevatorEncoderPostion.getValueAsDouble();
 	}
 
