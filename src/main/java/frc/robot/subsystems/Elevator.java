@@ -111,11 +111,8 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// elevatorMotorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
 
 		// Configure the elevator motor.  
-		// This should be a blocking call and wait up to 50ms for the config to apply.  //TODO verify?
-		long startTime = System.currentTimeMillis();
+		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
 		elevatorMotorConfigurator.apply(elevatorMotorConfig);
-		long endTime = System.currentTimeMillis();
-		System.out.println(buildString("Elevator Motor Config:  Delta (ms) = ", endTime-startTime, ".  Start = ", startTime, ".  End = ", endTime));
 
 		checkAndZeroElevatorEnc();
 
@@ -308,7 +305,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		long startTime = System.currentTimeMillis();
 		elevatorEncoderPostion.refresh();			// TODO verify that this is not a blocking call.
 		long endTime = System.currentTimeMillis();
-		System.out.println(buildString("Elevator position:  Delta (ms) = ", endTime-startTime, ".  Start = ", startTime, ".  End = ", endTime));
+		System.out.println(buildString("Elevator position:  Delta (ms) = ", endTime-startTime, ".  Start = ", startTime, ".  End = ", endTime, ".  pos = ", elevatorEncoderPostion.getValueAsDouble()));
 		return elevatorEncoderPostion.getValueAsDouble();
 	}
 
