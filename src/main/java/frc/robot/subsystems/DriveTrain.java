@@ -66,7 +66,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   private LinearFilter lfRunningAvg = LinearFilter.movingAverage(4); //calculate running average to smooth quantization error in angular velocity calc
 
   // variable to store vision camera
-  private PhotonCameraWrapper camera;
+  // private PhotonCameraWrapper camera;
 
   // Odometry class for tracking robot pose
   private final SwerveDrivePoseEstimator poseEstimator; 
@@ -95,7 +95,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   public DriveTrain(Field fieldUtil, Elevator elevator, FileLog log) {
     this.log = log; // save reference to the fileLog
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
-    this.camera = new PhotonCameraWrapper(fieldUtil, log, logRotationKey);
+    // this.camera = new PhotonCameraWrapper(fieldUtil, log, logRotationKey);
     this.elevator = elevator;
 
     // create swerve modules
@@ -504,7 +504,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   @Override
   public void enableFastLogging(boolean enabled) {
     fastLogging = enabled;
-    camera.enableFastLogging(enabled);
+    // camera.enableFastLogging(enabled);
   }
 
   /**
@@ -597,41 +597,41 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     poseEstimator.update(Rotation2d.fromDegrees(getGyroRotation()), getModulePositions());
 
     // Only run camera updates for pose estimator in teleop mode
-    if (camera.hasInit() && DriverStation.isTeleop()) {
-      Optional<EstimatedRobotPose> result = camera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
+    // if (camera.hasInit() && DriverStation.isTeleop()) {
+    //   Optional<EstimatedRobotPose> result = camera.getEstimatedGlobalPose(poseEstimator.getEstimatedPosition());
 
-      if (result.isPresent()) {
-        EstimatedRobotPose camPose = result.get();
-        // only updates odometry if close enough
-        // TODO change how it decides if it's too far
-        //if (camPose.estimatedPose.getX() < 3.3) {
-          poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
+    //   if (result.isPresent()) {
+    //     EstimatedRobotPose camPose = result.get();
+    //     // only updates odometry if close enough
+    //     // TODO change how it decides if it's too far
+    //     //if (camPose.estimatedPose.getX() < 3.3) {
+    //       poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
 
-          //field.getObject("Vision").setPose(camPose.estimatedPose.toPose2d());
-          SmartDashboard.putNumber("Vision X", camPose.estimatedPose.toPose2d().getX());
-          SmartDashboard.putNumber("Vision Y", camPose.estimatedPose.toPose2d().getY());
-          SmartDashboard.putNumber("Vision rot", camPose.estimatedPose.toPose2d().getRotation().getDegrees());
+    //       //field.getObject("Vision").setPose(camPose.estimatedPose.toPose2d());
+    //       SmartDashboard.putNumber("Vision X", camPose.estimatedPose.toPose2d().getX());
+    //       SmartDashboard.putNumber("Vision Y", camPose.estimatedPose.toPose2d().getY());
+    //       SmartDashboard.putNumber("Vision rot", camPose.estimatedPose.toPose2d().getRotation().getDegrees());
           
-          SmartDashboard.putNumber("Odo X", poseEstimator.getEstimatedPosition().getX());
-          SmartDashboard.putNumber("Odo Y", poseEstimator.getEstimatedPosition().getY());
-          SmartDashboard.putNumber("Odo rot", poseEstimator.getEstimatedPosition().getRotation().getDegrees());
-       // }
-      }
+    //       SmartDashboard.putNumber("Odo X", poseEstimator.getEstimatedPosition().getX());
+    //       SmartDashboard.putNumber("Odo Y", poseEstimator.getEstimatedPosition().getY());
+    //       SmartDashboard.putNumber("Odo rot", poseEstimator.getEstimatedPosition().getRotation().getDegrees());
+    //    // }
+    //   }
 
-    }
+    // }
 
-    if (camera.getAlliance() == Alliance.Red) {
-      Pose2d currPose = poseEstimator.getEstimatedPosition();
-      double x = FieldConstants.length - currPose.getX();
-      double y = FieldConstants.width - currPose.getY();
-      Rotation2d rot = currPose.getRotation().rotateBy(Rotation2d.fromDegrees(180));
+    // if (camera.getAlliance() == Alliance.Red) {
+    //   Pose2d currPose = poseEstimator.getEstimatedPosition();
+    //   double x = FieldConstants.length - currPose.getX();
+    //   double y = FieldConstants.width - currPose.getY();
+    //   Rotation2d rot = currPose.getRotation().rotateBy(Rotation2d.fromDegrees(180));
 
-      field.setRobotPose(new Pose2d(x, y, rot));
-    } else field.setRobotPose(poseEstimator.getEstimatedPosition());
+    //   field.setRobotPose(new Pose2d(x, y, rot));
+    // } else field.setRobotPose(poseEstimator.getEstimatedPosition());
   }  
 
-  public void cameraInit() {
-    camera.init();
-  }
+  // public void cameraInit() {
+  //   camera.init();
+  // }
 
 }

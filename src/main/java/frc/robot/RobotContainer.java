@@ -574,7 +574,7 @@ public class RobotContainer {
 
     driveTrain.setDriveModeCoast(false);
     driveTrain.enableFastLogging(false);    // Turn off fast logging, in case it was left on from auto mode
-    driveTrain.cameraInit();
+    // driveTrain.cameraInit();
     elevator.setMotorModeCoast(false);
 
     if (patternTeamMoving.isScheduled()) {
