@@ -120,8 +120,8 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// or setting the limit switch type (above) can be delayed up to 50ms for a round trip
 		// from the Rio to the Talon and back to the Rio.  So, reading position could give the wrong value if
 		// we don't wait (random weird behavior).
-		// DO NOT GET RID OF THIS WITHOUT TALKING TO DON OR ROB.
 		// Verified that this is still needed after migrating to Phoenix6.
+		// DO NOT GET RID OF THIS WITHOUT TALKING TO DON OR ROB.
 		Wait.waitTime(250);
 
 		// start the elevator in manual mode unless it is properly zeroed
