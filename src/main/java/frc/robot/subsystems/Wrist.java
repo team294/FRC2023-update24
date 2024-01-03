@@ -11,7 +11,15 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
+// import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -20,6 +28,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.CTREConfigs;
 import frc.robot.Constants.Ports;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.Constants.WristConstants.WristRegion;
@@ -39,6 +48,9 @@ public class Wrist extends SubsystemBase implements Loggable{
   private Elevator elevator;        // Do not call this elevator object in the Wrist constructor!  The elevator constructor will set this variable (after the wrist constructor).
 
   private final TalonFX wristMotor = new TalonFX(Ports.CANWristMotor);
+	private final TalonFXConfigurator wristMotorConfigurator = wristMotor.getConfigurator();
+	private TalonFXConfiguration wristMotorConfig;
+	private VoltageOut wristVoltage = new VoltageOut(0.0);
   
   private final DutyCycleEncoder revEncoder = new DutyCycleEncoder(Ports.DIOWristRevThroughBoreEncoder);
 
@@ -53,20 +65,48 @@ public class Wrist extends SubsystemBase implements Loggable{
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
     subsystemName = "Wrist";
 
+		// Start with factory default TalonFX configuratoin
+		wristMotorConfig = new TalonFXConfiguration();			// Factory default configuration
+		// wristMotorConfigurator.refresh(wristMotorConfig);			// Read current configuration.  This is blocking call, up to the default 50ms.
+
     // Configure motor
-    wristMotor.configFactoryDefault(100);
-    wristMotor.configAllSettings(CTREConfigs.wristFXConfig, 100);
-    wristMotor.selectProfileSlot(0, 0);
-    wristMotor.setInverted(true);           // Motor needs to be inverted due to config on robot
-    wristMotor.enableVoltageCompensation(true);
-    wristMotor.setNeutralMode(NeutralMode.Brake);
+		// wristMotorConfig.MotorOutput.DutyCycleNeutralDeadband = 0;  // Default = 0
+		// wristMotorConfig.MotorOutput.PeakForwardDutyCycle = 1.0;			// Default = 1.0.  We probably won't use duty-cycle control, since there is no longer voltage compensation
+		// wristMotorConfig.MotorOutput.PeakReverseDutyCycle = -1.0;			// Default = -1.0.  We probably won't use duty-cycle control, since there is no longer voltage compensation
+		wristMotorConfig.Voltage.PeakForwardVoltage = voltageCompSaturation;    // forward max output
+		wristMotorConfig.Voltage.PeakReverseVoltage = -voltageCompSaturation;   // back max output
+		wristMotorConfig.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.3;		      // 0.3 seconds
+		wristMotorConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.3; 		// 0.3 seconds
+		// wristMotorConfig.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.3;
+
+		// Note:  In Phoenix 6, slots are selected in the ControlRequest (ex. VelocityVoltage.Slot)
+
+      // Prior kP = 0.03;
+      // kP = (desired-output-1023max) / (error-in-encoder-ticks)
+      //    = (desired-output-1.0max)*(1023max/1.0max) * kWristDegreesPerTick/(error-in-degrees) 
+    wristMotorConfig.Slot0.kP = 0.0;		// TODO verify value!!!
+		wristMotorConfig.Slot0.kI = 0.0;
+		wristMotorConfig.Slot0.kD = 0.0;
+		// wristMotorConfig.Slot0.kS = 0.0;
+		// wristMotorConfig.Slot0.kV = 0.0;
+		// wristMotorConfig.Slot0.kA = 0.0;
+		// wristMotorConfig.Slot0.kG = 0.0;
+		// wristMotorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+
+ 		wristMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;		// TODO verify this!!!!
+		wristMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+
+    // Configure encoder on motor
+		wristMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    wristMotorConfig.ClosedLoopGeneral.ContinuousWrap = false;
+
+ 		// Configure the wrist motor.  
+		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
+		wristMotorConfigurator.apply(wristMotorConfig);
 
     stopWrist();
 
-    // Configure encoder on motor
-		wristMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
-		wristMotor.setSensorPhase(false);         // True = Flip direction of sensor reading
-    wristMotor.configFeedbackNotContinuous(false, 100);
+    //TODO stopped updates here!
 
     // Rev Through-Bore Encoder settings
     // Wait for through-bore encoder to connect, up to 0.25 sec
@@ -85,6 +125,7 @@ public class Wrist extends SubsystemBase implements Loggable{
     // changes the sign of read encoder value, but that change can be delayed up to 50ms for a round trip
     // from the Rio to the Talon and back to the Rio.  So, reading angles could give the wrong value if
     // we don't wait (random weird behavior).
+		// Verified that this is still needed after migrating to Phoenix6.
     // DO NOT GET RID OF THIS WITHOUT TALKING TO DON OR ROB.
     Wait.waitTime(250);
 
@@ -98,7 +139,12 @@ public class Wrist extends SubsystemBase implements Loggable{
       wristMotor.configReverseSoftLimitThreshold(wristDegreesToEncoderTickPosition(WristAngle.lowerLimit.value), 100);
       wristMotor.configForwardSoftLimitEnable(true, 100);
       wristMotor.configReverseSoftLimitEnable(true, 100);
-    }
+		// wristMotorConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = limit;
+		// wristMotorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+		// Configure the wrist motor.  
+		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
+		// wristMotorConfigurator.apply(wristMotorConfig);
+  }
   }
 
   /**

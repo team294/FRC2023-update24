@@ -96,32 +96,32 @@ public final class CTREConfigs {
     // }
 
     // Configuration for wrist motor
-    public static final TalonFXConfiguration wristFXConfig;
-    static {
-        wristFXConfig = new TalonFXConfiguration();
+    // public static final TalonFXConfiguration wristFXConfig;
+    // static {
+    //     wristFXConfig = new TalonFXConfiguration();
 
-        wristFXConfig.voltageCompSaturation = 12.0;
-        wristFXConfig.neutralDeadband = 0.0;
-        wristFXConfig.peakOutputForward = 1.0;       // forward max output
-        wristFXConfig.peakOutputReverse = -1.0;      // back max output
-        wristFXConfig.openloopRamp = 0.3;        // Start with trying 0.3
-        wristFXConfig.closedloopRamp = 0.3;      // Start with trying 0.3
+        // wristFXConfig.voltageCompSaturation = 12.0;
+        // wristFXConfig.neutralDeadband = 0.0;
+        // wristFXConfig.peakOutputForward = 1.0;       // forward max output
+        // wristFXConfig.peakOutputReverse = -1.0;      // back max output
+        // wristFXConfig.openloopRamp = 0.3;        // Start with trying 0.3
+        // wristFXConfig.closedloopRamp = 0.3;      // Start with trying 0.3
 
         // kP = (desired-output-1023max) / (error-in-encoder-ticks)
         //    = (desired-output-1.0max)*(1023max/1.0max) * kWristDegreesPerTick/(error-in-degrees) 
-        wristFXConfig.slot0.kP = 0.03;     // CALIBRATED 0.02.  Tried 0.04 in lab, but bangs wrist when stowing.
+        // wristFXConfig.slot0.kP = 0.03;     // CALIBRATED 0.02.  Tried 0.04 in lab, but bangs wrist when stowing.
         // kI = (desired-output-1023max) / [(time-ms) * (error-in-encoder-ticks)]
         //    = (desired-output-1.0max)*(1023max/1.0max) * (1.0sec/1000ms) * kWristDegreesPerTick / [(time-sec) * (error-in-degrees)]
-        wristFXConfig.slot0.kI = 0.0;       // Example from manual = 0.0005
+        // wristFXConfig.slot0.kI = 0.0;       // Example from manual = 0.0005
         // kD = (desired-output-1023max) * (time-ms) / (error-in-encoder-ticks)
         //    = (desired-output-1.0max)*(1023max/1.0max) * (1000ms/1.0sec) * kWristDegreesPerTick / (error-in-deg/sec)
-        wristFXConfig.slot0.kD = 0.0;       // Example from manual = 500
-        wristFXConfig.slot0.kF = 0.0;     // Use arbitrary FF instead
-        wristFXConfig.slot0.integralZone = 0.0/WristConstants.kWristDegreesPerTick;      // Need to convert I-zone from degrees to encoder ticks
+        // wristFXConfig.slot0.kD = 0.0;       // Example from manual = 500
+        // wristFXConfig.slot0.kF = 0.0;     // Use arbitrary FF instead
+        // wristFXConfig.slot0.integralZone = 0.0/WristConstants.kWristDegreesPerTick;      // Need to convert I-zone from degrees to encoder ticks
         // Max Iaccumulator value, in encoderTicks*milliseconds.  Max I power = kI * kIAccumMax.
-        wristFXConfig.slot0.maxIntegralAccumulator = 100.0 / wristFXConfig.slot0.kI;
+        // wristFXConfig.slot0.maxIntegralAccumulator = 100.0 / wristFXConfig.slot0.kI;
 
-        wristFXConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
+        // wristFXConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
         // wristFXConfig.forwardSoftLimitThreshold = 0.0;           //  Set in constructor instead, after calibrating encoder
         // wristFXConfig.forwardSoftLimitEnable = true;         
         // wristFXConfig.reverseSoftLimitThreshold = 0.0;
@@ -134,5 +134,5 @@ public final class CTREConfigs {
         // Stator current limit can be used to limit acceleration, torque, braking (when in brake mode), and motor heating.
         // wristFXConfig.statorCurrLimit = new StatorCurrentLimitConfiguration(
         //     enable, currentLimit, triggerThresholdCurrent, triggerThresholdTime);
-    }
+    // }
 }
