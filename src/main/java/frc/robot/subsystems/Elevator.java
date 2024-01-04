@@ -94,7 +94,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// elevatorMotorConfig.Slot0.kG = 0.0;
 		// elevatorMotorConfig.Slot0.GravityType = GravityTypeValue.Elevator_Static;
 
-		elevatorMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;		// TODO verify this!!!!
+		elevatorMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
 		elevatorMotorConfig.MotorOutput.NeutralMode = elevatorNeutralMode;
 
 		// configure encoder on motor
@@ -348,10 +348,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * @return Current elevator velocity in in/s, + equals up, - equals down
 	 */
 	public double getElevatorVelocity() {
-		long startTime = System.currentTimeMillis();
-		elevatorEncoderVelocity.refresh();			// TODO verify that this is not a blocking call.
-		long endTime = System.currentTimeMillis();
-		System.out.println(buildString("Elevator velocity:  Delta (ms) = ", endTime-startTime, ".  Start = ", startTime, ".  End = ", endTime));
+		elevatorEncoderVelocity.refresh();			// Verified that this is not a blocking call.
 		return elevatorEncoderVelocity.getValueAsDouble() * ElevatorConstants.kElevEncoderInchesPerTick;
 	}
 
@@ -361,10 +358,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * reads whether the elevator is at the upper limit
 	 */
 	public boolean isElevatorAtUpperLimit() {
-		long startTime = System.currentTimeMillis();
-		limitUpperSignal.refresh();			// TODO verify that this is not a blocking call.
-		long endTime = System.currentTimeMillis();
-		System.out.println(buildString("Upper limit switch:  Delta (ms) = ", endTime-startTime, ".  Start = ", startTime, ".  End = ", endTime));
+		limitUpperSignal.refresh();			// Verified that this is not a blocking call.
 		return limitUpperSignal.getValue() == ForwardLimitValue.ClosedToGround;
 	}
 
@@ -372,7 +366,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * reads whether the elevator is at the lower limit
 	 */
 	public boolean isElevatorAtLowerLimit() {
-		limitLowerSignal.refresh();			// TODO verify that this is not a blocking call.
+		limitLowerSignal.refresh();			// Verified that this is not a blocking call.
 		return limitLowerSignal.getValue() == ReverseLimitValue.ClosedToGround;
 	}
 
