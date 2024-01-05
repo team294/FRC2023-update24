@@ -238,7 +238,7 @@ public final class Constants {
     }
 
     public static final class WristConstants {
-        public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kEncoderCPR = 1.0;                // CALIBRATED = 1.  Encoder counts per revolution of FalconFX motor pinion gear    // TODO verify for Phoenix6
         public static final double kWristGearRatio = (50.0 / 1.0);       // From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
         public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
 
@@ -290,7 +290,7 @@ public final class Constants {
       }
 
       public static final class ElevatorConstants {
-        public static final double kEncoderCPR = 1.0;                // CALIBRATED = 1.  Encoder counts per revolution of FalconFX motor pinion gear     // TODO verify for Phoenix6
+        public static final double kEncoderCPR = 1.0;                // CALIBRATED = 1.  Encoder counts per revolution of FalconFX motor pinion gear
         public static final double kElevGearRatio = (12.0 / 1.0);        // CALIBRATED.  Gear reduction ratio between Falcon and gear driving the elevator
         public static final double kElevStages = 2.0;                   // Upper stage moves 2x compared to lower stage
         public static final double kElevGearDiameterInches = 1.273;       // CALIBRATED.  Diameter of the gear driving the elevator in inches.  Per CAD = 1.273.  Calibrated = 1.276.

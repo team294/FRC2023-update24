@@ -40,7 +40,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	private final TalonFX elevatorMotor  = new TalonFX(Ports.CANElevatorMotor);
 	private final TalonFXConfigurator elevatorMotorConfigurator = elevatorMotor.getConfigurator();
 	private TalonFXConfiguration elevatorMotorConfig;
-	private VoltageOut elevatorVoltage = new VoltageOut(0.0);
+	private VoltageOut elevatorVoltageControl = new VoltageOut(0.0);
 	private NeutralModeValue elevatorNeutralMode = NeutralModeValue.Coast;			// Variable to track the current brake/coast mode for the elevator
 
 	// Variables for motor signals and sensors
@@ -173,7 +173,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 * @param percentOutput between -1.0 (down) and 1.0 (up)
 	 */
 	private void setElevatorMotorPercentOutputDirect(double percentOutput) {
-		elevatorMotor.setControl(elevatorVoltage.withOutput(percentOutput*ElevatorConstants.voltageCompSaturation));
+		elevatorMotor.setControl(elevatorVoltageControl.withOutput(percentOutput*ElevatorConstants.voltageCompSaturation));
 	}
 
 	/**
