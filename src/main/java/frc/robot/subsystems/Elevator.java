@@ -7,8 +7,6 @@
 
 package frc.robot.subsystems;
 
-import static frc.robot.utilities.StringUtil.buildString;
-
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.*;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -94,7 +92,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// elevatorMotorConfig.Slot0.kG = 0.0;
 		// elevatorMotorConfig.Slot0.GravityType = GravityTypeValue.Elevator_Static;
 
-		elevatorMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
+		elevatorMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;			// Invert motor to make positive move the elevator up
 		elevatorMotorConfig.MotorOutput.NeutralMode = elevatorNeutralMode;
 
 		// configure encoder on motor
