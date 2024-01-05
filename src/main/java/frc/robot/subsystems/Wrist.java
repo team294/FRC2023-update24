@@ -83,6 +83,7 @@ public class Wrist extends SubsystemBase implements Loggable{
 
 		// Note:  In Phoenix 6, slots are selected in the ControlRequest (ex. PositionVoltage.Slot)
     wristPositionControl.Slot = 0;
+    wristPositionControl.OverrideBrakeDurNeutral = true;
       // Prior kP = 0.03;
       // kP = (desired-output-1023max) / (error-in-encoder-ticks)
       //    = (desired-output-1.0max)*(1023max/1.0max) * kWristDegreesPerTick/(error-in-degrees) 
@@ -96,7 +97,7 @@ public class Wrist extends SubsystemBase implements Loggable{
 		// wristMotorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
  		wristMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;		// TODO verify this!!!!
-		wristMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+		wristMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;          // Applies during VoltageControl only, since setting is being overridded for PositionControl
 
     // Configure encoder on motor
 		wristMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
