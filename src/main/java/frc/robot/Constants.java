@@ -238,7 +238,7 @@ public final class Constants {
     }
 
     public static final class WristConstants {
-        public static final double kEncoderCPR = 1.0;                // CALIBRATED = 1.  Encoder counts per revolution of FalconFX motor pinion gear    // TODO verify for Phoenix6
+        public static final double kEncoderCPR = 1.0;                // CALIBRATED = 1.  Encoder counts per revolution of FalconFX motor pinion gear
         public static final double kWristGearRatio = (50.0 / 1.0);       // From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
         public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
 
@@ -252,7 +252,7 @@ public final class Constants {
         // and -90 deg is with the CG of the wrist resting downward.
         public static double revEncoderOffsetAngleWrist = 0;    // -49.0 deg (was 69.0 deg before changing wrist chain)
 
-        public static final double kP = 0.72;   // TODO verify kP.  Calc 0.72 from 2023 kP value.  kP = (desired-output-volts) / (error-in-encoder-rotations)
+        public static final double kP = 0.72;   // Calc 0.72 from 2023 CALIBRATED kP value (0.03).  kP = (desired-output-volts) / (error-in-encoder-rotations)
         public static final double kG = 0.03;   // CALIBRATED 0.03.  Feed foward percent-out to add to hold arm horizontal (0 deg)
 
         // Wrist regions

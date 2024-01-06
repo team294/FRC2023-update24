@@ -70,7 +70,7 @@ public class Wrist extends SubsystemBase implements Loggable{
 		// wristMotorConfigurator.refresh(wristMotorConfig);			// Read current configuration.  This is blocking call, up to the default 50ms.
 
     // Configure motor
- 		wristMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;		// TODO verify this!!!!
+ 		wristMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;		// Invert motor output so that +Volt moves wrist up
 		wristMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;          // Applies during VoltageControl only, since setting is being overridded for PositionControl
 		// wristMotorConfig.MotorOutput.DutyCycleNeutralDeadband = 0;  // Default = 0
 		// wristMotorConfig.MotorOutput.PeakForwardDutyCycle = 1.0;			// Default = 1.0.  We probably won't use duty-cycle control, since there is no longer voltage compensation
@@ -185,7 +185,7 @@ public class Wrist extends SubsystemBase implements Loggable{
 	 */
 	public double getWristMotorPercentOutput() {
 		wristDutyCycle.refresh();			// Verified that this is not a blocking call.
-		return wristDutyCycle.getValueAsDouble();       // TODO Verify that this value reports correct, in Voltage or Position control modes
+		return wristDutyCycle.getValueAsDouble();
 	}
 
   /**
@@ -193,7 +193,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    * percent output control.
    * @return true = position control, false = direct percent output control
    */
-  public boolean isWristMotorPositionControl() {    // TODO verify that this is reading correctly
+  public boolean isWristMotorPositionControl() {
     return wristControlMode.refresh().getValue() == ControlModeValue.PositionVoltage;
   }
 
@@ -299,7 +299,7 @@ public class Wrist extends SubsystemBase implements Loggable{
    */
   public double getWristEncoderTicksRaw() {
     wristEncoderPostion.refresh();          // Verified that this is not a blocking call.
-    return wristEncoderPostion.getValueAsDouble();   //TODO verify that direction is correct
+    return wristEncoderPostion.getValueAsDouble();
   }
 
   /**
@@ -434,7 +434,7 @@ public class Wrist extends SubsystemBase implements Loggable{
   
   @Override
   public void periodic() {
-    if (log.isMyLogRotation(logRotationKey)) {    // TODO check these values
+    if (log.isMyLogRotation(logRotationKey)) {
       SmartDashboard.putBoolean("Wrist Rev connected", isRevEncoderConnected());
       SmartDashboard.putBoolean("Wrist calibrated", wristCalibrated);
       SmartDashboard.putNumber("Wrist Rev angle", getRevEncoderDegrees());
