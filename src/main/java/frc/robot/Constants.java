@@ -252,7 +252,7 @@ public final class Constants {
         // and -90 deg is with the CG of the wrist resting downward.
         public static double revEncoderOffsetAngleWrist = 0;    // -49.0 deg (was 69.0 deg before changing wrist chain)
 
-        public static final double kP = 0.0;   // TODO verify kP.  Calc 0.72 from 2023 kP value.  kP = (desired-output-volts) / (error-in-encoder-rotations)
+        public static final double kP = 0.72;   // TODO verify kP.  Calc 0.72 from 2023 kP value.  kP = (desired-output-volts) / (error-in-encoder-rotations)
         public static final double kG = 0.03;   // CALIBRATED 0.03.  Feed foward percent-out to add to hold arm horizontal (0 deg)
 
         // Wrist regions
