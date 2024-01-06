@@ -68,11 +68,13 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// create elevator motion profile object (do this first, used in "checkAndZeroElevatorEnc")
 		elevatorProfile = new ElevatorProfileGenerator(this, log);	
 
-		// Start with factory default TalonFX configuratoin
+		// Start with factory default TalonFX configuration
 		elevatorMotorConfig = new TalonFXConfiguration();			// Factory default configuration
 		// elevatorMotorConfigurator.refresh(elevatorMotorConfig);			// Read current configuration.  This is blocking call, up to the default 50ms.
 
 		// configure motor
+		elevatorMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;			// Invert motor to make positive move the elevator up
+		elevatorMotorConfig.MotorOutput.NeutralMode = elevatorNeutralMode;
 		// elevatorMotorConfig.MotorOutput.DutyCycleNeutralDeadband = 0;  // Default = 0
 		// elevatorMotorConfig.MotorOutput.PeakForwardDutyCycle = 1.0;			// Default = 1.0.  We probably won't use duty-cycle control, since there is no longer voltage compensation
 		// elevatorMotorConfig.MotorOutput.PeakReverseDutyCycle = -1.0;			// Default = -1.0.  We probably won't use duty-cycle control, since there is no longer voltage compensation
@@ -80,7 +82,6 @@ public class Elevator extends SubsystemBase implements Loggable{
 		elevatorMotorConfig.Voltage.PeakReverseVoltage = -ElevatorConstants.voltageCompSaturation;
 		elevatorMotorConfig.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.3;		// 0.3 seconds
 		// elevatorMotorConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.3; 		// Calibrate if using Talon PID (currently not being used)
-		// elevatorMotorConfig.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.3;	// Calibrate if using Talon PID (currently not being used)
 
 		// Note:  In Phoenix 6, slots are selected in the ControlRequest (ex. VelocityVoltage.Slot)
 		// elevatorMotorConfig.Slot0.kP = 0.0;		// Calibrate if using Talon PID (currently not being used)
@@ -91,9 +92,6 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// elevatorMotorConfig.Slot0.kA = 0.0;
 		// elevatorMotorConfig.Slot0.kG = 0.0;
 		// elevatorMotorConfig.Slot0.GravityType = GravityTypeValue.Elevator_Static;
-
-		elevatorMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;			// Invert motor to make positive move the elevator up
-		elevatorMotorConfig.MotorOutput.NeutralMode = elevatorNeutralMode;
 
 		// configure encoder on motor
 		elevatorMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
@@ -108,7 +106,7 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// elevatorMotorConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = limit;
 		// elevatorMotorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
 
-		// Configure the elevator motor.  
+		// Apply configuration to the elevator motor.  
 		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
 		elevatorMotorConfigurator.apply(elevatorMotorConfig);
 

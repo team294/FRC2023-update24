@@ -19,9 +19,7 @@ import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import frc.robot.CTREConfigs;
 import frc.robot.Constants.Ports;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.Constants.WristConstants.WristAngle;
 import frc.robot.Constants.WristConstants.WristRegion;
@@ -67,11 +65,13 @@ public class Wrist extends SubsystemBase implements Loggable{
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
     subsystemName = "Wrist";
 
-		// Start with factory default TalonFX configuratoin
+		// Start with factory default TalonFX configuration
 		wristMotorConfig = new TalonFXConfiguration();			// Factory default configuration
 		// wristMotorConfigurator.refresh(wristMotorConfig);			// Read current configuration.  This is blocking call, up to the default 50ms.
 
     // Configure motor
+ 		wristMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;		// TODO verify this!!!!
+		wristMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;          // Applies during VoltageControl only, since setting is being overridded for PositionControl
 		// wristMotorConfig.MotorOutput.DutyCycleNeutralDeadband = 0;  // Default = 0
 		// wristMotorConfig.MotorOutput.PeakForwardDutyCycle = 1.0;			// Default = 1.0.  We probably won't use duty-cycle control, since there is no longer voltage compensation
 		// wristMotorConfig.MotorOutput.PeakReverseDutyCycle = -1.0;			// Default = -1.0.  We probably won't use duty-cycle control, since there is no longer voltage compensation
@@ -79,15 +79,16 @@ public class Wrist extends SubsystemBase implements Loggable{
 		wristMotorConfig.Voltage.PeakReverseVoltage = -voltageCompSaturation;   // back max output
 		wristMotorConfig.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.3;		      // 0.3 seconds
 		wristMotorConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.3; 		// 0.3 seconds
-		// wristMotorConfig.ClosedLoopRamps.DutyCycleClosedLoopRampPeriod = 0.3;
 
-		// Note:  In Phoenix 6, slots are selected in the ControlRequest (ex. PositionVoltage.Slot)
+    // Configure encoder on motor
+		wristMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    wristMotorConfig.ClosedLoopGeneral.ContinuousWrap = false;
+
+    // Configure PID for PositionVoltage control
+    // Note:  In Phoenix 6, slots are selected in the ControlRequest (ex. PositionVoltage.Slot)
     wristPositionControl.Slot = 0;
     wristPositionControl.OverrideBrakeDurNeutral = true;
-      // Prior kP = 0.03;
-      // kP = (desired-output-1023max) / (error-in-encoder-ticks)
-      //    = (desired-output-1.0max)*(1023max/1.0max) * kWristDegreesPerTick/(error-in-degrees) 
-    wristMotorConfig.Slot0.kP = 0.0;		// TODO verify value!!!
+    wristMotorConfig.Slot0.kP = kP;		// kP = (desired-output-volts) / (error-in-encoder-rotations)
 		wristMotorConfig.Slot0.kI = 0.0;
 		wristMotorConfig.Slot0.kD = 0.0;
 		// wristMotorConfig.Slot0.kS = 0.0;
@@ -96,14 +97,7 @@ public class Wrist extends SubsystemBase implements Loggable{
 		// wristMotorConfig.Slot0.kG = 0.0;
 		// wristMotorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
 
- 		wristMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;		// TODO verify this!!!!
-		wristMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;          // Applies during VoltageControl only, since setting is being overridded for PositionControl
-
-    // Configure encoder on motor
-		wristMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-    wristMotorConfig.ClosedLoopGeneral.ContinuousWrap = false;
-
- 		// Configure the wrist motor.  
+ 		// Apply configuration to the wrist motor.  
 		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
 		wristMotorConfigurator.apply(wristMotorConfig);
 
@@ -139,7 +133,7 @@ public class Wrist extends SubsystemBase implements Loggable{
 		  wristMotorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
       wristMotorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
 
-      // Configure the wrist motor.  
+   		// Apply configuration to the wrist motor.  
       // This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
       wristMotorConfigurator.apply(wristMotorConfig);
     }
@@ -222,8 +216,9 @@ public class Wrist extends SubsystemBase implements Loggable{
         }
       }
 
-      wristMotor.set(ControlMode.Position, wristDegreesToEncoderTickPosition(safeAngle), 
-        DemandType.ArbitraryFeedForward, kG * Math.cos(safeAngle*Math.PI/180.0));
+      // Phoenix6 PositionVoltage control:  Position is in rotations, FeedFoward is in Volts
+      wristMotor.setControl(wristPositionControl.withPosition(wristDegreesToEncoderTickPosition(safeAngle))
+                            .withFeedForward(kG * Math.cos(safeAngle*Math.PI/180.0) * voltageCompSaturation));
 
       if (elevator != null) {
         log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle,
