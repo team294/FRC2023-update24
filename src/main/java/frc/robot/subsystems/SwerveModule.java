@@ -150,7 +150,7 @@ public class SwerveModule {
 		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
 		driveMotorConfigurator.apply(driveMotorConfig);
 
-
+//TODO Stopped here!
     // configure turning motor
     turningMotor.configFactoryDefault(100);
     turningMotor.configAllSettings(CTREConfigs.swerveAngleFXConfig, 100);
