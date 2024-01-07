@@ -22,6 +22,7 @@ public class DriveResetSwerveModules extends Command {
    * force the motors and encoders to have the right calibration and settings, especially the
    * calibration angle for each swerve module.
    * <p> Note:  This command can run while the robot is disabled.
+   * <p> <b>Note</b> that this command includes multiple blocking calls and will delay robot code.
    * @param driveTrain driveTrain subsytem
    * @param log FileLog
   */

@@ -24,7 +24,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import frc.robot.utilities.FileLog;
 import static frc.robot.Constants.Ports.*;
 
 import static frc.robot.Constants.DriveConstants.*;
@@ -101,16 +100,16 @@ public class DriveTrain extends SubsystemBase implements Loggable {
     // create swerve modules
     swerveFrontLeft = new SwerveModule( "FL",
       CANDriveFrontLeftMotor, CANDriveTurnFrontLeftMotor, CANTurnEncoderFrontLeft, 
-      false, false, false, offsetAngleFrontLeftMotor, log);
+      false, offsetAngleFrontLeftMotor, log);
     swerveFrontRight = new SwerveModule( "FR",
       CANDriveFrontRightMotor, CANDriveTurnFrontRightMotor, CANTurnEncoderFrontRight, 
-      false, false, false, offsetAngleFrontRightMotor, log);
+      false, offsetAngleFrontRightMotor, log);
     swerveBackLeft = new SwerveModule( "BL",
       CANDriveBackLeftMotor, CANDriveTurnBackLeftMotor, CANTurnEncoderBackLeft, 
-      false, false, false, offsetAngleBackLeftMotor, log);
+      false, offsetAngleBackLeftMotor, log);
     swerveBackRight = new SwerveModule( "BR",
       CANDriveBackRightMotor, CANDriveTurnBackRightMotor, CANTurnEncoderBackRight, 
-      false, false, false, offsetAngleBackRightMotor, log);
+      false, offsetAngleBackRightMotor, log);
 
     // configure navX gyro
     AHRS gyro = null;
@@ -234,6 +233,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
    * <p>However, if the robot browns-out or otherwise partially resets, then this can be used to 
    * force the motors and encoders to have the right calibration and settings, especially the
    * calibration angle for each swerve module.
+   * <p> <b>Note</b> that this procedure includes multiple blocking calls and will delay robot code.
    */
   public void configureSwerveModules(){
     swerveFrontLeft.configSwerveModule();

@@ -7,9 +7,19 @@ package frc.robot.subsystems;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.ctre.phoenix.sensors.WPI_CANCoder;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,12 +41,23 @@ public class SwerveModule {
   private final String swName;    // Name for this swerve module
   private final FileLog log;
   private final boolean cancoderReversed;
-  private final boolean driveEncoderReversed;
-  private final boolean turningEncoderReversed;
   private final double turningOffsetDegrees;
 
-  private final WPI_TalonFX driveMotor;
-  private final WPI_TalonFX turningMotor;
+  // Drive motor objects
+  private final TalonFX driveMotor;
+	private final TalonFXConfigurator driveMotorConfigurator;
+	private TalonFXConfiguration driveMotorConfig;
+	private VoltageOut driveVoltageControl = new VoltageOut(0.0);
+  private VelocityVoltage driveVelocityControl = new VelocityVoltage(0.0);
+
+  // Turning motor objects
+  private final TalonFX turningMotor;
+	private final TalonFXConfigurator turningMotorConfigurator;
+	private TalonFXConfiguration turningMotorConfig;
+	private VoltageOut turningVoltageControl = new VoltageOut(0.0);
+  private PositionVoltage turningPositionControl = new PositionVoltage(0.0);
+
+  // CANCoder objects
   private final WPI_CANCoder turningCanCoder;
 
   private double driveEncoderZero = 0;      // Reference raw encoder reading for drive FalconFX encoder.  Calibration sets this to zero.
@@ -54,26 +75,27 @@ public class SwerveModule {
    * @param driveMotorAddress The CANbus address of the drive motor.
    * @param turningMotorAddress The CANbus address of the turning motor.
    * @param cancoderAddress The CANbus address of the turning encoder.
-   * @param driveEncoderReversed Whether the drive encoder is reversed.
-   * @param turningEncoderReversed Whether the turning encoder is reversed.
+   * @param cancoderReversed Whether the CANcoder is reversed.
    * @param turningOffsetDegrees Offset degrees in the turning motor to point to the 
    * front of the robot.  Value is the desired encoder zero point, in absolute magnet position reading.
+   * @param log FileLog for logging
    */
   public SwerveModule(String swName, int driveMotorAddress, int turningMotorAddress, int cancoderAddress,
-      boolean driveEncoderReversed, boolean turningEncoderReversed, boolean cancoderReversed,
-      double turningOffsetDegrees, FileLog log) {
+      boolean cancoderReversed, double turningOffsetDegrees, FileLog log) {
 
     // Save the module name and logfile
     this.swName = swName;
     this.log = log;
     this.cancoderReversed = cancoderReversed;
-    this.driveEncoderReversed = driveEncoderReversed;
-    this.turningEncoderReversed = turningEncoderReversed;
     this.turningOffsetDegrees = turningOffsetDegrees;
 
     // Create motor and encoder objects
-    driveMotor = new WPI_TalonFX(driveMotorAddress);
-    turningMotor = new WPI_TalonFX(turningMotorAddress);
+    driveMotor = new TalonFX(driveMotorAddress);
+    driveMotorConfigurator = driveMotor.getConfigurator();
+
+    turningMotor = new TalonFX(turningMotorAddress);
+    turningMotorConfigurator = turningMotor.getConfigurator();
+
     turningCanCoder = new WPI_CANCoder(cancoderAddress);
 
     // Configure the swerve module motors and encoders
@@ -92,14 +114,42 @@ public class SwerveModule {
    * However, if the robot browns-out or otherwise partially resets, then this can be used to 
    * force the encoders to have the right calibration and settings, especially the
    * calibration angle for each swerve module.
+   * <p> <b>Note</b> that this procedure includes multiple blocking calls and will delay robot code.
    */
   public void configSwerveModule() {
-    //configure drive motors
-    driveMotor.configFactoryDefault(100);
-    driveMotor.configAllSettings(CTREConfigs.swerveDriveFXConfig, 100);
-    driveMotor.selectProfileSlot(0, 0);
-    driveMotor.setInverted(false);
-    driveMotor.enableVoltageCompensation(true);
+    // **** configure drive motor
+
+ 		// Start with factory default TalonFX configuration
+		driveMotorConfig = new TalonFXConfiguration();			// Factory default configuration
+    driveMotorConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;		// Don't invert motor
+		driveMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;          // Boot to coast mode, so robot is easy to push
+    driveMotorConfig.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.0;
+		driveMotorConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.0;
+
+    // Supply current limit is typically used to prevent breakers from tripping.
+    driveMotorConfig.CurrentLimits.SupplyCurrentLimit = 35.0;       // (amps) If current is above threshold value longer than threshold time, then limit current to this value
+    driveMotorConfig.CurrentLimits.SupplyCurrentThreshold = 60.0;   // (amps) Threshold current
+    driveMotorConfig.CurrentLimits.SupplyTimeThreshold = 0.1;       // (sec) Threshold time
+    driveMotorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    // configure drive encoder
+		driveMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+
+    // Configure PID for VelocityVoltage control
+    // Note:  In Phoenix 6, slots are selected in the ControlRequest (ex. PositionVoltage.Slot)
+    driveVelocityControl.Slot = 0;
+    driveVelocityControl.OverrideBrakeDurNeutral = true;
+    driveMotorConfig.Slot0.kP = 0.0;		// TODO calibrate.  2023 Phoenix5 = 0.10.  kP = (desired-output-volts) / (error-in-encoder-rps)
+		driveMotorConfig.Slot0.kI = 0.0;
+		driveMotorConfig.Slot0.kD = 0.0;    // TODO calibrate.  2023 Phoenix5 = 0.005.  kD = (desired-output-volts) / (error-in-encoder-rps/s)
+		// driveMotorConfig.Slot0.kS = 0.0;
+		// driveMotorConfig.Slot0.kV = 0.0;
+		// driveMotorConfig.Slot0.kA = 0.0;
+
+ 		// Apply configuration to the drive motor.  
+		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
+		driveMotorConfigurator.apply(driveMotorConfig);
+
 
     // configure turning motor
     turningMotor.configFactoryDefault(100);
@@ -113,13 +163,8 @@ public class SwerveModule {
     turningCanCoder.configAllSettings(CTREConfigs.swerveCanCoderConfig, 100);
     turningCanCoder.configSensorDirection(cancoderReversed, 100);
 
-    // configure drive encoder
-    driveMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
-    driveMotor.setSensorPhase(driveEncoderReversed);
-
     // configure turning TalonFX encoder
     turningMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
-    turningMotor.setSensorPhase(turningEncoderReversed);
 
     // NOTE!!! When the Cancoder or TalonFX encoder settings are changed above, then the next call to 
     // getCanCoderDegrees() getTurningEncoderDegrees() may contain an old value, not the value based on 

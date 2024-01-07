@@ -12,29 +12,29 @@ import frc.robot.Constants.WristConstants;
 public final class CTREConfigs {
 
     // Configuration for swerve drive motors
-    public static final TalonFXConfiguration swerveDriveFXConfig;
-    static {
-        swerveDriveFXConfig = new TalonFXConfiguration();
+    // public static final TalonFXConfiguration swerveDriveFXConfig;
+    // static {
+        // swerveDriveFXConfig = new TalonFXConfiguration();
 
-        swerveDriveFXConfig.voltageCompSaturation = 12.0;
-        swerveDriveFXConfig.neutralDeadband = 0.0;
+        // swerveDriveFXConfig.voltageCompSaturation = 12.0;
+        // swerveDriveFXConfig.neutralDeadband = 0.0;
 
-        swerveDriveFXConfig.slot0.kP = 0.10;     // Team364 uses 0.10             // CALIBRATED
-        swerveDriveFXConfig.slot0.kI = 0.0;
-        swerveDriveFXConfig.slot0.kD = 0.005;                                   // CALIBRATED
-        swerveDriveFXConfig.slot0.kF = 0.0;     // Use arbitrary FF instead
-        swerveDriveFXConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
-        swerveDriveFXConfig.openloopRamp = 0.0;     // Team364 uses 0.25        
-        swerveDriveFXConfig.closedloopRamp = 0.0;                               
+        // swerveDriveFXConfig.slot0.kP = 0.10;     // Team364 uses 0.10             // CALIBRATED
+        // swerveDriveFXConfig.slot0.kI = 0.0;
+        // swerveDriveFXConfig.slot0.kD = 0.005;                                   // CALIBRATED
+        // swerveDriveFXConfig.slot0.kF = 0.0;     // Use arbitrary FF instead
+        // swerveDriveFXConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
+        // swerveDriveFXConfig.openloopRamp = 0.0;     // Team364 uses 0.25        
+        // swerveDriveFXConfig.closedloopRamp = 0.0;                               
 
         // Supply current limit is typically used to prevent breakers from tripping.
-        swerveDriveFXConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration(
-            true, 35, 60, 0.1);
+        // swerveDriveFXConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration(
+        //     true, 35, 60, 0.1);
 
         // Stator current limit can be used to limit acceleration, torque, braking (when in brake mode), and motor heating.
         // swerveDriveFXConfig.statorCurrLimit = new StatorCurrentLimitConfiguration(
         //     enable, currentLimit, triggerThresholdCurrent, triggerThresholdTime);
-    }
+    // }
 
     // Configuration for swerve angle motors
     public static final TalonFXConfiguration swerveAngleFXConfig;

@@ -119,6 +119,7 @@ public final class Constants {
         public static final double kTurningEncoderDegreesPerTick = 360.0/kEncoderCPR / kTurningGearRatio;
         
         // Robot calibration for feed-forward and max speeds
+        public static final double voltageCompSaturation = 12.0;
         // Max speed is used to keep each motor from maxing out, which preserves ratio between motors 
         // and ensures that the robot travels in the requested direction.  So, use min value of all 4 motors,
         // and further derate (initial test by 5%) to account for some battery droop under heavy loads.
