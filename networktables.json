@@ -1,0 +1,58 @@
+[
+  {
+    "name": "/Preferences/Drive.offsetAngleFrontLeftMotor",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive.offsetAngleFrontRightMotor",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive.offsetAngleBackLeftMotor",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Drive.offsetAngleBackRightMotor",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/Wrist.offsetAngleWrist",
+    "type": "double",
+    "value": 0.0,
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/problemSubsystem",
+    "type": "string",
+    "value": "RobotPreferences, CAN Bus",
+    "properties": {
+      "persistent": true
+    }
+  },
+  {
+    "name": "/Preferences/problemExists",
+    "type": "boolean",
+    "value": true,
+    "properties": {
+      "persistent": true
+    }
+  }
+]
