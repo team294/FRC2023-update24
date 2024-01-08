@@ -37,24 +37,24 @@ public final class CTREConfigs {
     // }
 
     // Configuration for swerve angle motors
-    public static final TalonFXConfiguration swerveAngleFXConfig;
-    static {
-        swerveAngleFXConfig = new TalonFXConfiguration();
+    // public static final TalonFXConfiguration swerveAngleFXConfig;
+    // static {
+        // swerveAngleFXConfig = new TalonFXConfiguration();
 
-        swerveAngleFXConfig.voltageCompSaturation = 12.0;
-        swerveAngleFXConfig.neutralDeadband = 0.0;
+        // swerveAngleFXConfig.voltageCompSaturation = 12.0;
+        // swerveAngleFXConfig.neutralDeadband = 0.0;
 
-        swerveAngleFXConfig.slot0.kP = 0.15;     // CALIBRATED = 0.15.  Team364 uses 0.60.
-        swerveAngleFXConfig.slot0.kI = 0.0;
-        swerveAngleFXConfig.slot0.kD = 3.0;     // CALIBRATED = 3.0.  Team364 uses 12.0.
-        swerveAngleFXConfig.slot0.kF = 0.0;
-        swerveAngleFXConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
-        swerveAngleFXConfig.openloopRamp = 0.1;
-        swerveAngleFXConfig.closedloopRamp = 0.1;   // CALIBRATED = 0.1.
+        // swerveAngleFXConfig.slot0.kP = 0.15;     // CALIBRATED = 0.15.  Team364 uses 0.60.
+        // swerveAngleFXConfig.slot0.kI = 0.0;
+        // swerveAngleFXConfig.slot0.kD = 3.0;     // CALIBRATED = 3.0.  Team364 uses 12.0.
+        // swerveAngleFXConfig.slot0.kF = 0.0;
+        // swerveAngleFXConfig.initializationStrategy = SensorInitializationStrategy.BootToZero;
+        // swerveAngleFXConfig.openloopRamp = 0.1;
+        // swerveAngleFXConfig.closedloopRamp = 0.1;   // CALIBRATED = 0.1.
 
-        swerveAngleFXConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration(
-            true, 25, 40, 0.1);
-    }
+        // swerveAngleFXConfig.supplyCurrLimit = new SupplyCurrentLimitConfiguration(
+        //     true, 25, 40, 0.1);
+    // }
 
     // Configuration for swerve angle CanCoders
     public static final CANCoderConfiguration swerveCanCoderConfig;

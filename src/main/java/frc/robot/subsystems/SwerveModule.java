@@ -150,21 +150,46 @@ public class SwerveModule {
 		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
 		driveMotorConfigurator.apply(driveMotorConfig);
 
-//TODO Stopped here!
-    // configure turning motor
-    turningMotor.configFactoryDefault(100);
-    turningMotor.configAllSettings(CTREConfigs.swerveAngleFXConfig, 100);
-    turningMotor.selectProfileSlot(0, 0);
-    turningMotor.setInverted(true);
-    turningMotor.enableVoltageCompensation(true);
+    // **** configure turning motor
 
-    // configure turning CanCoder
+ 		// Start with factory default TalonFX configuration
+		turningMotorConfig = new TalonFXConfiguration();			// Factory default configuration
+    turningMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;		// Invert motor
+		turningMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;          // Boot to coast mode, so robot is easy to push
+    turningMotorConfig.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.1;
+		turningMotorConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.1;
+
+    // Supply current limit is typically used to prevent breakers from tripping.
+    turningMotorConfig.CurrentLimits.SupplyCurrentLimit = 25.0;       // (amps) If current is above threshold value longer than threshold time, then limit current to this value
+    turningMotorConfig.CurrentLimits.SupplyCurrentThreshold = 40.0;   // (amps) Threshold current
+    turningMotorConfig.CurrentLimits.SupplyTimeThreshold = 0.1;       // (sec) Threshold time
+    turningMotorConfig.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    // configure drive encoder
+		turningMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+
+    // Configure PID for PositionVoltage control
+    // Note:  In Phoenix 6, slots are selected in the ControlRequest (ex. PositionVoltage.Slot)
+    turningPositionControl.Slot = 0;
+    turningPositionControl.OverrideBrakeDurNeutral = true;
+    turningMotorConfig.Slot0.kP = 0.0;		// TODO calibrate.  2023 Phoenix5 = 0.15.  kP = (desired-output-volts) / (error-in-encoder-rotations)
+		turningMotorConfig.Slot0.kI = 0.0;
+		turningMotorConfig.Slot0.kD = 0.0;    // TODO calibrate.  2023 Phoenix5 = 3.0.  kD = (desired-output-volts) / (error-in-encoder-rps)
+		// turningMotorConfig.Slot0.kS = 0.0;
+		// turningMotorConfig.Slot0.kV = 0.0;
+		// turningMotorConfig.Slot0.kA = 0.0;
+
+ 		// Apply configuration to the drive motor.  
+		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
+		turningMotorConfigurator.apply(turningMotorConfig);
+
+    //TODO Stopped here!
+
+
+    // **** configure turning CanCoder
     turningCanCoder.configFactoryDefault(100);
     turningCanCoder.configAllSettings(CTREConfigs.swerveCanCoderConfig, 100);
     turningCanCoder.configSensorDirection(cancoderReversed, 100);
-
-    // configure turning TalonFX encoder
-    turningMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
 
     // NOTE!!! When the Cancoder or TalonFX encoder settings are changed above, then the next call to 
     // getCanCoderDegrees() getTurningEncoderDegrees() may contain an old value, not the value based on 
