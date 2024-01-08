@@ -1,0 +1,16 @@
+----------------------------
+2023-01-20 16:32:25.820,FileLog,Open,sim\logfilesim.A1.2023-01-20.16-32-25.csv
+2023-01-20 16:32:26.243,SwerveModule FL,ZeroDriveEncoder,driveEncoderZero,0.0,raw encoder,0.0,encoder meters,0.0
+2023-01-20 16:32:26.244,SwerveModule FL,calibrateCanCoder,cancoderZero,-0.0,raw encoder,0.0,encoder degrees,0.0
+2023-01-20 16:32:26.245,SwerveModule FL,calibrateTurningEncoder,turningEncoderZero,0.0,raw encoder,0.0,set degrees,0.0,encoder degrees,0.0
+2023-01-20 16:32:26.555,SwerveModule FR,ZeroDriveEncoder,driveEncoderZero,0.0,raw encoder,0.0,encoder meters,0.0
+2023-01-20 16:32:26.555,SwerveModule FR,calibrateCanCoder,cancoderZero,-0.0,raw encoder,0.0,encoder degrees,0.0
+2023-01-20 16:32:26.556,SwerveModule FR,calibrateTurningEncoder,turningEncoderZero,0.0,raw encoder,0.0,set degrees,0.0,encoder degrees,0.0
+2023-01-20 16:32:26.839,SwerveModule BL,ZeroDriveEncoder,driveEncoderZero,0.0,raw encoder,0.0,encoder meters,0.0
+2023-01-20 16:32:26.839,SwerveModule BL,calibrateCanCoder,cancoderZero,-0.0,raw encoder,0.0,encoder degrees,0.0
+2023-01-20 16:32:26.840,SwerveModule BL,calibrateTurningEncoder,turningEncoderZero,0.0,raw encoder,0.0,set degrees,0.0,encoder degrees,0.0
+2023-01-20 16:32:27.123,SwerveModule BR,ZeroDriveEncoder,driveEncoderZero,0.0,raw encoder,0.0,encoder meters,0.0
+2023-01-20 16:32:27.123,SwerveModule BR,calibrateCanCoder,cancoderZero,-0.0,raw encoder,0.0,encoder degrees,0.0
+2023-01-20 16:32:27.123,SwerveModule BR,calibrateTurningEncoder,turningEncoderZero,0.0,raw encoder,0.0,set degrees,0.0,encoder degrees,0.0
+2023-01-20 16:32:27.272,Disabled,Robot disabled,
+2023-01-20 16:32:27.274,CAN Bus,Sticky Faults Logged,
