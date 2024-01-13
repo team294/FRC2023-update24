@@ -111,7 +111,7 @@ public final class Constants {
 
     public static final class SwerveConstants {
         // Encoder calibration to meters travelled or wheel facing degrees
-        public static final double kEncoderCPR = 2048.0;                // CALIBRATED-3 = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kEncoderCPR = 1.0;                // CALIBRATED-3 = 1.  Encoder counts per revolution of FalconFX motor pinion gear
         public static final double kDriveGearRatio = (6.75 / 1.0);      // CALIBRATED-3 = 6.75/1.0.  Team364 (MK3i?) = 6.86:1.  Mk4i = 8.14:1 (L1-std gears).  Mk4i = 6.75:1 (L2-fast gears)
         public static final double kTurningGearRatio = (150.0/7.0 / 1.0); // CALIBRATED-3 = 150.0/7.0.  Team364 (MK3i?) = 12.8:1.  Mk4i = 150/7 : 1
         public static final double kWheelDiameterMeters = 0.09712;        // CALIBRATED-3 = 0.09712.  Depends a little on the tread wear!
