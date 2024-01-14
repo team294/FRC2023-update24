@@ -448,7 +448,7 @@ public class SwerveModule {
   public double getCanCoderDegrees() {
     turningCanCoderPosition.refresh();
     // return MathBCR.normalizeAngle(turningCanCoder.getAbsolutePosition() - cancoderZero);
-    return MathBCR.normalizeAngle(turningCanCoderPosition.getValueAsDouble() - cancoderZero);
+    return MathBCR.normalizeAngle(turningCanCoderPosition.getValueAsDouble()*360 - cancoderZero);
   }
 
   /**
