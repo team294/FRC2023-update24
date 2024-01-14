@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.hardware.CANcoder;
-import com.ctre.phoenix6.configs.MagnetSensorConfigs;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.CANcoderConfiguration;
 import com.ctre.phoenix6.configs.CANcoderConfigurator;
@@ -14,6 +12,7 @@ import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
 
@@ -36,7 +35,6 @@ public class SwerveModule {
       
   private final String swName;    // Name for this swerve module
   private final FileLog log;
-  private final boolean cancoderReversed;
   private final double turningOffsetDegrees;
 
   // Drive motor objects
@@ -67,16 +65,17 @@ public class SwerveModule {
 	private final StatusSignal<Double> turningStatorCurrent;		// Motor stator current, in amps (+=fwd, -=rev)
 	private final StatusSignal<Double> turningEncoderPosition;			// Encoder position, in pinion rotations
 	private final StatusSignal<Double> turningEncoderVelocity;			// Encoder Velocity, in pinion rotations/second
-	private final StatusSignal<Double> turningCanCoderPosition;			// CanCoder position, in pinion rotations
-	private final StatusSignal<Double> turningCanCoderVelocity;			// Encoder Velocity, in pinion rotations/second
-
 
   // CANCoder objects
-  //private final WPI_CANCoder turningCanCoder;
   private final CANcoder turningCanCoder;
-  private final CANcoderConfiguration turningCanCoderConfig;
   private final CANcoderConfigurator turningCanCoderConfigurator;
+  private CANcoderConfiguration turningCanCoderConfig;
+	
+  // CANCoder signals and sensors
+	private final StatusSignal<Double> turningCanCoderPosition;			// CanCoder position, in CANCoder rotations
+	private final StatusSignal<Double> turningCanCoderVelocity;			// Encoder Velocity, in CANCoder rotations/second
 
+  // Variables for encoder zeroing
   private double driveEncoderZero = 0;      // Reference raw encoder reading for drive FalconFX encoder.  Calibration sets this to zero.
   private double cancoderZero = 0;          // Reference raw encoder reading for CanCoder.  Calibration sets this to the absolute position from RobotPreferences.
   private double turningEncoderZero = 0;    // Reference raw encoder reading for turning FalconFX encoder.  Calibration sets this to match the CanCoder.
@@ -102,7 +101,6 @@ public class SwerveModule {
     // Save the module name and logfile
     this.swName = swName;
     this.log = log;
-    this.cancoderReversed = cancoderReversed;
     this.turningOffsetDegrees = turningOffsetDegrees;
 
     // Create motor, encoder, signal, and sensor objects
@@ -123,10 +121,10 @@ public class SwerveModule {
 	  turningEncoderPosition = turningMotor.getPosition();
 	  turningEncoderVelocity = turningMotor.getVelocity();
 
-    //turningCanCoder = new WPI_CANCoder(cancoderAddress);
     turningCanCoder = new CANcoder(cancoderAddress);
-    // turningCanCoderConfigurator = turningCanCoderCooler.getConfigurator();
-    // turningCanCoderConfig = new CANcoderConfiguration();
+    turningCanCoderConfigurator = turningCanCoder.getConfigurator();
+    turningCanCoderPosition = turningCanCoder.getPosition();
+    turningCanCoderVelocity = turningCanCoder.getVelocity();
     
     // **** Setup drive motor configuration
 
@@ -185,14 +183,17 @@ public class SwerveModule {
 		// turningMotorConfig.Slot0.kS = 0.0;
 		// turningMotorConfig.Slot0.kV = 0.0;
 		// turningMotorConfig.Slot0.kA = 0.0;
-    turningCanCoderConfigurator = turningCanCoder.getConfigurator();
-    turningCanCoderConfig = new CANcoderConfiguration(); 
+
+    // **** Setup CANCoder configuration
+
+ 		// Start with factory default CANCoder configuration
+    turningCanCoderConfig = new CANcoderConfiguration();			// Factory default configuration
+    turningCanCoderConfig.MagnetSensor.AbsoluteSensorRange = AbsoluteSensorRangeValue.Signed_PlusMinusHalf;
     turningCanCoderConfig.MagnetSensor.SensorDirection = cancoderReversed ? SensorDirectionValue.Clockwise_Positive : SensorDirectionValue.CounterClockwise_Positive;  //TODO Determine which direction is reversed
-    turningCanCoderPosition = turningCanCoder.getPosition();
-    turningCanCoderVelocity = turningCanCoder.getVelocity();
+
     // Configure the swerve module motors and encoders
     configSwerveModule();
-    // Error when put in configSwerveModule
+
     // other configs for drive and turning motors
     setMotorModeCoast(true);        // true on boot up, so robot is easy to push.  Change to false in autoinit or teleopinit
   }
@@ -209,24 +210,16 @@ public class SwerveModule {
    */
   public void configSwerveModule() {
  		// Apply configuration to the drive motor.
-		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
+		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.
 		driveMotorConfigurator.apply(driveMotorConfig);
 
  		// Apply configuration to the turning motor.
-		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
+		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.
 		turningMotorConfigurator.apply(turningMotorConfig);
 
     // Apply configuration to the cancoder
+		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.
     turningCanCoderConfigurator.apply(turningCanCoderConfig);
-    // **** configure turning CanCoder
-    // turningCanCoder.configFactoryDefault(100);
-    // turningCanCoder.configAllSettings(CTREConfigs.swerveCanCoderConfig, 100);
-    // turningCanCoder.configSensorDirection(cancoderReversed, 100);
-    // turningCanCoderConfigurator = turningCanCoderCooler.getConfigurator();
-    // turningCanCoderConfig = new CANcoderConfiguration();
-
-
-    
 
     // NOTE!!! When the Cancoder or TalonFX encoder settings are changed above, then the next call to 
     // getCanCoderDegrees() getTurningEncoderDegrees() may contain an old value, not the value based on 
@@ -437,7 +430,10 @@ public class SwerveModule {
     // System.out.println(swName + " " + turningOffsetDegrees);
     // turningCanCoder.configMagnetOffset(offsetDegrees, 100);
     cancoderZero = -offsetDegrees;
-    log.writeLogEcho(true, buildString("SwerveModule ", swName), "calibrateCanCoder", "cancoderZero", cancoderZero, "raw encoder", turningCanCoder.getAbsolutePosition(), "encoder degrees", getCanCoderDegrees());
+    log.writeLogEcho(true, buildString("SwerveModule ", swName), "calibrateCanCoder", 
+      "cancoderZero", cancoderZero, 
+      "raw encoder", turningCanCoderPosition.refresh().getValueAsDouble()*360.0, 
+      "encoder degrees", getCanCoderDegrees());
   }
 
   /**
@@ -447,8 +443,7 @@ public class SwerveModule {
    */
   public double getCanCoderDegrees() {
     turningCanCoderPosition.refresh();
-    // return MathBCR.normalizeAngle(turningCanCoder.getAbsolutePosition() - cancoderZero);
-    return MathBCR.normalizeAngle(turningCanCoderPosition.getValueAsDouble()*360 - cancoderZero);
+    return MathBCR.normalizeAngle(turningCanCoderPosition.getValueAsDouble()*360.0 - cancoderZero);
   }
 
   /**
@@ -457,8 +452,7 @@ public class SwerveModule {
    */
   public double getCanCoderVelocityDPS() {
     turningCanCoderVelocity.refresh();
-    return turningCanCoderVelocity.getValueAsDouble();
-    //return turningCanCoder.getVelocity();
+    return turningCanCoderVelocity.getValueAsDouble()*360.0;
   }
 
 

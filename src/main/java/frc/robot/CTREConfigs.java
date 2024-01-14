@@ -57,15 +57,14 @@ public final class CTREConfigs {
     // }
 
     // Configuration for swerve angle CanCoders
-    public static final CANCoderConfiguration swerveCanCoderConfig;
-    static {
-        swerveCanCoderConfig = new CANCoderConfiguration();
+    // public static final CANCoderConfiguration swerveCanCoderConfig;
+    // static {
+        // swerveCanCoderConfig = new CANCoderConfiguration();
 
-        // swerveCanCoderConfig.absoluteSensorRange = AbsoluteSensorRange.Unsigned_0_to_360;
-        swerveCanCoderConfig.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
-        swerveCanCoderConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
-        swerveCanCoderConfig.sensorTimeBase = SensorTimeBase.PerSecond;
-    }
+        // swerveCanCoderConfig.absoluteSensorRange = AbsoluteSensorRange.Signed_PlusMinus180;
+        // swerveCanCoderConfig.initializationStrategy = SensorInitializationStrategy.BootToAbsolutePosition;
+        // swerveCanCoderConfig.sensorTimeBase = SensorTimeBase.PerSecond;
+    // }
 
     // Configuration for elevator motor
     // public static final TalonFXConfiguration elevatorFXConfig;
