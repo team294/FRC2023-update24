@@ -606,7 +606,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
         // only updates odometry if close enough
         // TODO change how it decides if it's too far
         //if (camPose.estimatedPose.getX() < 3.3) {
-          poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
+          // poseEstimator.addVisionMeasurement(camPose.estimatedPose.toPose2d(), camPose.timestampSeconds);
 
           //field.getObject("Vision").setPose(camPose.estimatedPose.toPose2d());
           SmartDashboard.putNumber("Vision X", camPose.estimatedPose.toPose2d().getX());

@@ -117,7 +117,7 @@ public class PhotonCameraWrapper extends SubsystemBase {
     if (newPoseOptional.isPresent()) {
       EstimatedRobotPose newPose = newPoseOptional.get();
       if(fastLogging || log.isMyLogRotation(logRotationKey)) {
-        log.writeLog(false, "PhotonCameraWrapper", "getEstimatedGlobalPose", "NewPose", "X",newPose.estimatedPose.getX(),"Y",newPose.estimatedPose.getY());
+        log.writeLog(false, "PhotonCameraWrapper", "getEstimatedGlobalPose", "NewPose", "X",newPose.estimatedPose.getX(),"Y",newPose.estimatedPose.getY(), "PhotonTargetPosition", photonCamera.getLatestResult().getBestTarget().getBestCameraToTarget());
       }
     }
     return newPoseOptional;
