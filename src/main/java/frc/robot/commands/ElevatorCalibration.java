@@ -21,7 +21,8 @@ public class ElevatorCalibration extends Command {
 
   /** Creates a new ElevatorCalibration. */
   /**
-   * 
+   * Ramps elevator speed upwards and then downwards, reversing when 
+   * 2 inches from top or bottom.
    * @param rampRate Ramp rate in pctOut/second 
    * @param elevator
    * @param log

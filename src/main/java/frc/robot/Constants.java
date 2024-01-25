@@ -111,7 +111,7 @@ public final class Constants {
 
     public static final class SwerveConstants {
         // Encoder calibration to meters travelled or wheel facing degrees
-        public static final double kEncoderCPR = 2048.0;                // CALIBRATED-3 = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kEncoderCPR = 1.0;                // CALIBRATED-3 = 1.  Encoder counts per revolution of FalconFX motor pinion gear
         public static final double kDriveGearRatio = (6.75 / 1.0);      // CALIBRATED-3 = 6.75/1.0.  Team364 (MK3i?) = 6.86:1.  Mk4i = 8.14:1 (L1-std gears).  Mk4i = 6.75:1 (L2-fast gears)
         public static final double kTurningGearRatio = (150.0/7.0 / 1.0); // CALIBRATED-3 = 150.0/7.0.  Team364 (MK3i?) = 12.8:1.  Mk4i = 150/7 : 1
         public static final double kWheelDiameterMeters = 0.09712;        // CALIBRATED-3 = 0.09712.  Depends a little on the tread wear!
@@ -119,6 +119,7 @@ public final class Constants {
         public static final double kTurningEncoderDegreesPerTick = 360.0/kEncoderCPR / kTurningGearRatio;
         
         // Robot calibration for feed-forward and max speeds
+        public static final double voltageCompSaturation = 12.0;
         // Max speed is used to keep each motor from maxing out, which preserves ratio between motors 
         // and ensures that the robot travels in the requested direction.  So, use min value of all 4 motors,
         // and further derate (initial test by 5%) to account for some battery droop under heavy loads.
@@ -238,10 +239,11 @@ public final class Constants {
     }
 
     public static final class WristConstants {
-        public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kEncoderCPR = 1.0;                // CALIBRATED = 1.  Encoder counts per revolution of FalconFX motor pinion gear
         public static final double kWristGearRatio = (50.0 / 1.0);       // From CAD, should be 50:1.  Gear reduction ratio between Falcon and gear driving the wrist (planetary and chain gears)
         public static final double kWristDegreesPerTick =  360.0 / kEncoderCPR / kWristGearRatio * 0.9726;      // CALIBRATED (fudge factor 0.9726)
 
+        public static final double voltageCompSaturation = 12.0;
         public static final double maxUncalibratedPercentOutput = 0.05;     // CALIBRATED
         public static final double maxPercentOutput = 0.1;          // CALIBRATED
 
@@ -251,7 +253,8 @@ public final class Constants {
         // and -90 deg is with the CG of the wrist resting downward.
         public static double revEncoderOffsetAngleWrist = 0;    // -49.0 deg (was 69.0 deg before changing wrist chain)
 
-        public static final double kG = 0.03;   // CALIBRATED 0.02.  Feed foward percent-out to add to hold arm horizontal (0 deg)
+        public static final double kP = 0.72;   // Calc 0.72 from 2023 CALIBRATED kP value (0.03).  kP = (desired-output-volts) / (error-in-encoder-rotations)
+        public static final double kG = 0.03;   // CALIBRATED 0.03.  Feed foward percent-out to add to hold arm horizontal (0 deg)
 
         // Wrist regions
         public enum WristRegion {
@@ -289,12 +292,13 @@ public final class Constants {
       }
 
       public static final class ElevatorConstants {
-        public static final double kEncoderCPR = 2048.0;                // CALIBRATED = 2048.  Encoder counts per revolution of FalconFX motor pinion gear
+        public static final double kEncoderCPR = 1.0;                // CALIBRATED = 1.  Encoder counts per revolution of FalconFX motor pinion gear
         public static final double kElevGearRatio = (12.0 / 1.0);        // CALIBRATED.  Gear reduction ratio between Falcon and gear driving the elevator
         public static final double kElevStages = 2.0;                   // Upper stage moves 2x compared to lower stage
         public static final double kElevGearDiameterInches = 1.273;       // CALIBRATED.  Diameter of the gear driving the elevator in inches.  Per CAD = 1.273.  Calibrated = 1.276.
         public static final double kElevEncoderInchesPerTick = (kElevGearDiameterInches * Math.PI) / kEncoderCPR / kElevGearRatio * kElevStages;
 
+        public static final double voltageCompSaturation = 12.0;
         public static final double maxUncalibratedPercentOutput = 0.10;     // CALIBRATED
         public static final double maxManualPercentOutput = 0.50;  // CALIBRATED
 

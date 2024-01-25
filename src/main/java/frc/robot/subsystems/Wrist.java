@@ -7,18 +7,18 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.TalonFXFeedbackDevice;
-import com.ctre.phoenix.motorcontrol.can.TalonFX;
+import com.ctre.phoenix6.StatusSignal;
+import com.ctre.phoenix6.configs.*;
+import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.*;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-import frc.robot.CTREConfigs;
 import frc.robot.Constants.Ports;
 import frc.robot.Constants.ElevatorConstants.ElevatorRegion;
 import frc.robot.Constants.WristConstants.WristAngle;
@@ -39,7 +39,19 @@ public class Wrist extends SubsystemBase implements Loggable{
   private Elevator elevator;        // Do not call this elevator object in the Wrist constructor!  The elevator constructor will set this variable (after the wrist constructor).
 
   private final TalonFX wristMotor = new TalonFX(Ports.CANWristMotor);
+	private final TalonFXConfigurator wristMotorConfigurator = wristMotor.getConfigurator();
+	private TalonFXConfiguration wristMotorConfig;
+	private VoltageOut wristVoltageControl = new VoltageOut(0.0);
+  private PositionVoltage wristPositionControl = new PositionVoltage(0.0);
   
+	// Variables for motor signals and sensors
+	private final StatusSignal<Double> wristMotorTemp = wristMotor.getDeviceTemp();				  // Motor temperature, in degC
+	private final StatusSignal<ControlModeValue> wristControlMode = wristMotor.getControlMode();			// Motor control mode (typ. ControlModeValue.VoltageOut or .PositionVoltage)
+	private final StatusSignal<Double> wristDutyCycle = wristMotor.getDutyCycle();				  // Motor duty cycle percent power, -1 to 1
+	private final StatusSignal<Double> wristStatorCurrent = wristMotor.getStatorCurrent();	// Motor stator current, in amps (+=fwd, -=rev)
+	private final StatusSignal<Double> wristEncoderPostion = wristMotor.getPosition();			// Encoder position, in pinion rotations
+
+  // Rev through-bore encoder
   private final DutyCycleEncoder revEncoder = new DutyCycleEncoder(Ports.DIOWristRevThroughBoreEncoder);
 
   private double revEncoderZero = 0;          // Reference raw encoder reading for encoder.  Calibration sets this to the absolute position from RobotPreferences.
@@ -53,20 +65,43 @@ public class Wrist extends SubsystemBase implements Loggable{
     logRotationKey = log.allocateLogRotation();     // Get log rotation for this subsystem
     subsystemName = "Wrist";
 
-    // Configure motor
-    wristMotor.configFactoryDefault(100);
-    wristMotor.configAllSettings(CTREConfigs.wristFXConfig, 100);
-    wristMotor.selectProfileSlot(0, 0);
-    wristMotor.setInverted(true);           // Motor needs to be inverted due to config on robot
-    wristMotor.enableVoltageCompensation(true);
-    wristMotor.setNeutralMode(NeutralMode.Brake);
+		// Start with factory default TalonFX configuration
+		wristMotorConfig = new TalonFXConfiguration();			// Factory default configuration
+		// wristMotorConfigurator.refresh(wristMotorConfig);			// Read current configuration.  This is blocking call, up to the default 50ms.
 
-    stopWrist();
+    // Configure motor
+ 		wristMotorConfig.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;		// Invert motor output so that +Volt moves wrist up
+		wristMotorConfig.MotorOutput.NeutralMode = NeutralModeValue.Brake;          // Applies during VoltageControl only, since setting is being overridded for PositionControl
+		// wristMotorConfig.MotorOutput.DutyCycleNeutralDeadband = 0;  // Default = 0
+		// wristMotorConfig.MotorOutput.PeakForwardDutyCycle = 1.0;			// Default = 1.0.  We probably won't use duty-cycle control, since there is no longer voltage compensation
+		// wristMotorConfig.MotorOutput.PeakReverseDutyCycle = -1.0;			// Default = -1.0.  We probably won't use duty-cycle control, since there is no longer voltage compensation
+		wristMotorConfig.Voltage.PeakForwardVoltage = voltageCompSaturation;    // forward max output
+		wristMotorConfig.Voltage.PeakReverseVoltage = -voltageCompSaturation;   // back max output
+		wristMotorConfig.OpenLoopRamps.VoltageOpenLoopRampPeriod = 0.3;		      // 0.3 seconds
+		wristMotorConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.3; 		// 0.3 seconds
 
     // Configure encoder on motor
-		wristMotor.configSelectedFeedbackSensor(TalonFXFeedbackDevice.IntegratedSensor, 0, 100);
-		wristMotor.setSensorPhase(false);         // True = Flip direction of sensor reading
-    wristMotor.configFeedbackNotContinuous(false, 100);
+		wristMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+    wristMotorConfig.ClosedLoopGeneral.ContinuousWrap = false;
+
+    // Configure PID for PositionVoltage control
+    // Note:  In Phoenix 6, slots are selected in the ControlRequest (ex. PositionVoltage.Slot)
+    wristPositionControl.Slot = 0;
+    wristPositionControl.OverrideBrakeDurNeutral = true;
+    wristMotorConfig.Slot0.kP = kP;		// kP = (desired-output-volts) / (error-in-encoder-rotations)
+		wristMotorConfig.Slot0.kI = 0.0;
+		wristMotorConfig.Slot0.kD = 0.0;
+		// wristMotorConfig.Slot0.kS = 0.0;
+		// wristMotorConfig.Slot0.kV = 0.0;
+		// wristMotorConfig.Slot0.kA = 0.0;
+		// wristMotorConfig.Slot0.kG = 0.0;
+		// wristMotorConfig.Slot0.GravityType = GravityTypeValue.Arm_Cosine;
+
+ 		// Apply configuration to the wrist motor.  
+		// This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
+		wristMotorConfigurator.apply(wristMotorConfig);
+
+    stopWrist();
 
     // Rev Through-Bore Encoder settings
     // Wait for through-bore encoder to connect, up to 0.25 sec
@@ -85,19 +120,22 @@ public class Wrist extends SubsystemBase implements Loggable{
     // changes the sign of read encoder value, but that change can be delayed up to 50ms for a round trip
     // from the Rio to the Talon and back to the Rio.  So, reading angles could give the wrong value if
     // we don't wait (random weird behavior).
+		// Verified that this is still needed after migrating to Phoenix6.
     // DO NOT GET RID OF THIS WITHOUT TALKING TO DON OR ROB.
     Wait.waitTime(250);
 
     if (wristCalibrated) {
       calibrateWristEnc(getRevEncoderDegrees());
 
-      // adjustWristCalZero();
-
       // Configure soft limits on motor
-      wristMotor.configForwardSoftLimitThreshold(wristDegreesToEncoderTickPosition(WristAngle.upperLimit.value), 100);
-      wristMotor.configReverseSoftLimitThreshold(wristDegreesToEncoderTickPosition(WristAngle.lowerLimit.value), 100);
-      wristMotor.configForwardSoftLimitEnable(true, 100);
-      wristMotor.configReverseSoftLimitEnable(true, 100);
+		  wristMotorConfig.SoftwareLimitSwitch.ForwardSoftLimitThreshold = wristDegreesToEncoderTickPosition(WristAngle.upperLimit.value);
+		  wristMotorConfig.SoftwareLimitSwitch.ReverseSoftLimitThreshold = wristDegreesToEncoderTickPosition(WristAngle.lowerLimit.value);
+		  wristMotorConfig.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+      wristMotorConfig.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+
+   		// Apply configuration to the wrist motor.  
+      // This is a blocking call and will wait up to 50ms-70ms for the config to apply.  (initial test = 62ms delay)
+      wristMotorConfigurator.apply(wristMotorConfig);
     }
   }
 
@@ -138,7 +176,25 @@ public class Wrist extends SubsystemBase implements Loggable{
       percentOutput = MathUtil.clamp(percentOutput, -maxUncalibratedPercentOutput, maxUncalibratedPercentOutput);
     }
 
-    wristMotor.set(ControlMode.PercentOutput, percentOutput);
+    wristMotor.setControl(wristVoltageControl.withOutput(percentOutput*voltageCompSaturation));
+  }
+
+ 	/**
+	 * Gets the wrist percent output of the voltage compensation limit.
+	 * @return between -1.0 (down) and 1.0 (up)
+	 */
+	public double getWristMotorPercentOutput() {
+		wristDutyCycle.refresh();			// Verified that this is not a blocking call.
+		return wristDutyCycle.getValueAsDouble();
+	}
+
+  /**
+   * Returns a boolean to indicate if the wrist is in position control or direct
+   * percent output control.
+   * @return true = position control, false = direct percent output control
+   */
+  public boolean isWristMotorPositionControl() {
+    return wristControlMode.refresh().getValue() == ControlModeValue.PositionVoltage;
   }
 
   /**
@@ -160,8 +216,9 @@ public class Wrist extends SubsystemBase implements Loggable{
         }
       }
 
-      wristMotor.set(ControlMode.Position, wristDegreesToEncoderTickPosition(safeAngle), 
-        DemandType.ArbitraryFeedForward, kG * Math.cos(safeAngle*Math.PI/180.0));
+      // Phoenix6 PositionVoltage control:  Position is in rotations, FeedFoward is in Volts
+      wristMotor.setControl(wristPositionControl.withPosition(wristDegreesToEncoderTickPosition(safeAngle))
+                            .withFeedForward(kG * Math.cos(safeAngle*Math.PI/180.0) * voltageCompSaturation));
 
       if (elevator != null) {
         log.writeLog(false, subsystemName, "Set angle", "Desired angle", angle, "Set angle", safeAngle,
@@ -185,7 +242,7 @@ public class Wrist extends SubsystemBase implements Loggable{
     double currentTarget;
 
     if (wristCalibrated) {
-      if (wristMotor.getControlMode() == ControlMode.Position) {
+      if (isWristMotorPositionControl()) {
         currentTarget = safeAngle;
       } else {
         // If we are not in position control mode, then we aren't moving towards a target (and the target
@@ -225,7 +282,7 @@ public class Wrist extends SubsystemBase implements Loggable{
 
     WristRegion curRegion = getRegion(getWristAngle());
 
-    if (wristMotor.getControlMode() == ControlMode.Position) {
+    if (isWristMotorPositionControl()) {
       WristRegion targetRegion = getRegion(safeAngle);
 
       if (targetRegion != WristRegion.main) curRegion = WristRegion.back;
@@ -238,10 +295,11 @@ public class Wrist extends SubsystemBase implements Loggable{
 
   /**
    * 
-   * @return raw encoder ticks, adjusted direction (positive is towards stowed, negative is towards lower hard stop)
+   * @return raw encoder reading, in pinion rotations, adjusted direction (positive is towards stowed, negative is towards lower hard stop)
    */
   public double getWristEncoderTicksRaw() {
-    return wristMotor.getSelectedSensorPosition(0);
+    wristEncoderPostion.refresh();          // Verified that this is not a blocking call.
+    return wristEncoderPostion.getValueAsDouble();
   }
 
   /**
@@ -318,27 +376,6 @@ public class Wrist extends SubsystemBase implements Loggable{
 			"Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget());
   }  
   
-	/**
-	 * If the angle is reading >/< max/min angle, add/subtract 360 degrees to the wristCalZero accordingly
-	 * Note: when the motor is not inverted, upon booting up, an absolute encoder reads a value between 0 and 2048
-	 * 		 when the motor is inverted, upon booting up, an absolute encoder reads a value between 0 and -2048????  (that was true for mag-encoder.  is it true for Falcon internal encoder?)
-	 * Note: absolute encoder values don't wrap during operation
-	 */
-	// public void adjustWristCalZero() {
-  //   log.writeLogEcho(false, subsystemName, "Adjust wrist pre", "wrist angle", getWristAngle(), 
-  //     "raw ticks", getWristEncoderTicksRaw(), "wristCalZero", wristCalZero);
-	// 	if(getWristAngle() < WristAngle.lowerLimit.value - 15.0) {
-  //     log.writeLogEcho(false, subsystemName, "Adjust wrist", "Below min angle");
-	// 		wristCalZero -= WristConstants.kEncoderCPR;
-	// 	}
-	// 	else if(getWristAngle() > WristAngle.upperLimit.value + 10.0) {
-  //     log.writeLogEcho(false, subsystemName, "Adjust wrist", "Above max angle");
-	// 		wristCalZero += WristConstants.kEncoderCPR;
-	// 	}
-  //   log.writeLogEcho(false, subsystemName, "Adjust wrist post", "wrist angle", getWristAngle(), 
-  //     "raw ticks", getWristEncoderTicksRaw(), "wristCalZero", wristCalZero);
-	// }
-
  	// ************ REV through-bore encoder methods
 
   /**
@@ -377,8 +414,8 @@ public class Wrist extends SubsystemBase implements Loggable{
    */
   public void updateWristLog(boolean logWhenDisabled) {
     log.writeLog(logWhenDisabled, subsystemName, "Update Variables",
-      "Temp", wristMotor.getTemperature(), "Percent Output", wristMotor.getMotorOutputPercent(),
-      "Amps", wristMotor.getStatorCurrent(),
+      "Temp", wristMotorTemp.refresh().getValueAsDouble(), "Percent Output", getWristMotorPercentOutput(),
+      "Amps", wristStatorCurrent.refresh().getValueAsDouble(),
       "WristCalZero", wristCalZero, "Enc Raw", getWristEncoderTicksRaw(), 
       "Wrist Degrees", getWristEncoderDegrees(),
       "Wrist Angle", getWristAngle(), "Wrist Target", getCurrentWristTarget(),
@@ -404,7 +441,7 @@ public class Wrist extends SubsystemBase implements Loggable{
       SmartDashboard.putNumber("Wrist angle", getWristAngle());
       SmartDashboard.putNumber("Wrist enc raw", getWristEncoderTicksRaw());
       SmartDashboard.putNumber("Wrist target angle", getCurrentWristTarget());
-      SmartDashboard.putNumber("Wrist output", wristMotor.getMotorOutputPercent());
+      SmartDashboard.putNumber("Wrist output", getWristMotorPercentOutput());
     }
         
     if (fastLogging || log.isMyLogRotation(logRotationKey)) {
@@ -420,9 +457,9 @@ public class Wrist extends SubsystemBase implements Loggable{
 
     // If in manual drive mode and if elevator object exists, 
     // then enforce interlocks (stop wrist if at edge of allowed region based on elevator)
-    if (wristMotor.getControlMode() == ControlMode.PercentOutput && elevator != null && wristCalibrated) {
+    if (!isWristMotorPositionControl() && elevator != null && wristCalibrated) {
       double angle = getWristEncoderDegrees();
-      double pct = wristMotor.getMotorOutputPercent();
+      double pct = getWristMotorPercentOutput();
       double tol = 1.0;     // degrees tolerance for safeties
 
       switch (elevator.getElevatorRegion()) {
