@@ -51,7 +51,7 @@ import frc.robot.utilities.TrajectoryCache.TrajectoryFacing;
  */
 public class RobotContainer {
   // Define robot key utilities (DO THIS FIRST)
-  private final FileLog log = new FileLog("J3");
+  private final FileLog log = new FileLog("J4");
   private final AllianceSelection allianceSelection = new AllianceSelection(log);
   private final Compressor compressor = new Compressor(PneumaticsModuleType.REVPH);
   private final Field field = new Field(allianceSelection, log);
@@ -192,7 +192,12 @@ public class RobotContainer {
     SmartDashboard.putData("Manipulator Toggle", new ManipulatorTogglePiston(manipulator, led, log));
 
     // Vision Commands
-    SmartDashboard.putData("Vision Drive Grid Callibration", new PhotonVisionGridDataCollection(3, 3, 5, 1.5, driveTrain, log));
+    // TODO Make sure it logs camera data
+    SmartDashboard.putData("Vision Drive Grid Callibration", new SequentialCommandGroup(
+      new FileLogWrite(false, false, "Vision Data Collection", "init"),
+      new PhotonVisionGridDataCollection(15, 5, 10, 2, driveTrain, log),
+      new FileLogWrite(false, false, "Vision Data Collection", "end")
+    ));
   }
 
   /**
