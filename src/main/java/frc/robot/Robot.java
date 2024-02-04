@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -26,6 +28,8 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    // DataLogManager.start();
+    // NetworkTableInstance.getDefault().addLogger(0, 100, event -> DataLogManager.log(event.logMessage.filename + ":" + event.logMessage.line + ":" + event.logMessage.message));
     // Read robot Preferences from the RoboRIO to the Constants class.  Be sure to do this
     // before creating the robotContainer, so that all of the subsystems see the values
     // from the RoboRIO instead of the default values.
