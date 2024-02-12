@@ -302,6 +302,18 @@ public final class Constants {
         public static final double maxUncalibratedPercentOutput = 0.10;     // CALIBRATED
         public static final double maxManualPercentOutput = 0.50;  // CALIBRATED
 
+        public static final double MMCruiseVelocity = 80;   // Not Calibrated
+        public static final double MMAcceleration = 160;    // Not Calibrated
+        public static final double MMJerk = 1600;           // Not Calibrated
+
+        //Values from ElevatorProfileGenerator class
+        public static final double kSu = 0.01425;	 // CALIBRATED
+        public static final double kVu = 0.0149;  // CALIBRATED was 0.0149 week 1.  Tried 0.022 in lab, too high
+        public static final double kAu = 0.001;   // CALIBRATED was 0.001 week 1.  Tried 0.003 in lab, too high
+        public static final double kPu = 0.10;    // CALIBRATED
+        public static final double kIu = 0;
+        public static final double kDu = 0;
+
         // Elevator regions
         public enum ElevatorRegion {
             bottom,     // In the elevator bottom region, the wrist may be in any wrist region.

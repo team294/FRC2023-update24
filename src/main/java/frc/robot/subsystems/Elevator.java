@@ -9,6 +9,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.*;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.*;
@@ -84,14 +85,31 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// elevatorMotorConfig.ClosedLoopRamps.VoltageClosedLoopRampPeriod = 0.3; 		// Calibrate if using Talon PID (currently not being used)
 
 		// Note:  In Phoenix 6, slots are selected in the ControlRequest (ex. VelocityVoltage.Slot)
-		// elevatorMotorConfig.Slot0.kP = 0.0;		// Calibrate if using Talon PID (currently not being used)
-		// elevatorMotorConfig.Slot0.kI = 0.0;
-		// elevatorMotorConfig.Slot0.kD = 0.0;
-		// elevatorMotorConfig.Slot0.kS = 0.0;
-		// elevatorMotorConfig.Slot0.kV = 0.0;
-		// elevatorMotorConfig.Slot0.kA = 0.0;
+		var slot0Configs = elevatorMotorConfig.Slot0;
+		elevatorMotorConfig.Slot0.kP = ElevatorConstants.kPu;		// Calibrate if using Talon PID (currently not being used)
+		elevatorMotorConfig.Slot0.kI = ElevatorConstants.kIu;
+		elevatorMotorConfig.Slot0.kD = ElevatorConstants.kDu;
+		elevatorMotorConfig.Slot0.kS = ElevatorConstants.kSu;
+		elevatorMotorConfig.Slot0.kV = ElevatorConstants.kVu;
+		elevatorMotorConfig.Slot0.kA = ElevatorConstants.kAu;
 		// elevatorMotorConfig.Slot0.kG = 0.0;
 		// elevatorMotorConfig.Slot0.GravityType = GravityTypeValue.Elevator_Static;
+
+		//set Magic Motion Settings
+		var motionMagicConfigs = elevatorMotorConfig.MotionMagic;
+		motionMagicConfigs.MotionMagicCruiseVelocity = ElevatorConstants.MMCruiseVelocity; // Target cruise velocity of 80 rps
+		motionMagicConfigs.MotionMagicAcceleration = ElevatorConstants.MMAcceleration; // Target acceleration of 160 rps/s (0.5 seconds)
+		motionMagicConfigs.MotionMagicJerk = ElevatorConstants.MMJerk; // Target jerk of 1600 rps/s/s (0.1 seconds)
+
+		// Calculate max rotations for elevator limits (or find in code)
+		// Find max MMCruiseVelocity, MMAcceleration, and MMJerk values
+		// test motionMagic moving to defined (low, mid upper) positions
+		//
+		// create a Motion Magic request, voltage output
+		// final MotionMagicVoltage m_request = new MotionMagicVoltage(0);
+
+		// set target position to 100 rotations
+		// elevatorMotorConfig.setControl(m_request.withPosition(100));
 
 		// configure encoder on motor
 		elevatorMotorConfig.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
