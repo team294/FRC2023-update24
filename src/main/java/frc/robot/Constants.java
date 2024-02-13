@@ -302,17 +302,18 @@ public final class Constants {
         public static final double maxUncalibratedPercentOutput = 0.10;     // CALIBRATED
         public static final double maxManualPercentOutput = 0.50;  // CALIBRATED
 
-        public static final double MMCruiseVelocity = 80;   // Not Calibrated
-        public static final double MMAcceleration = 160;    // Not Calibrated
-        public static final double MMJerk = 1600;           // Not Calibrated
+        public static final double MMCruiseVelocity = 63/kElevEncoderInchesPerTick;   // 63 in/sec.  TODO Not Calibrated.  Max trapezoid velocity in motor rps.
+        public static final double MMAcceleration = 150/kElevEncoderInchesPerTick;    // 150 in/sec^2.  TODO Not Calibrated.  Max trapezoid acceleration in motor rot/sec^2.  MMVel/MMAccel = (# seconds to full velocity)
+        public static final double MMJerk = MMAcceleration/0.05;  // TODO Not Calibrated.  Jerk in 0.05 sec.  Max trapezoid jerk in motor rot/sec^3.  MMAccel/MMJerk = (# seconds to full accel)
 
-        //Values from ElevatorProfileGenerator class
-        public static final double kSu = 0.01425;	 // CALIBRATED
-        public static final double kVu = 0.0149;  // CALIBRATED was 0.0149 week 1.  Tried 0.022 in lab, too high
-        public static final double kAu = 0.001;   // CALIBRATED was 0.001 week 1.  Tried 0.003 in lab, too high
-        public static final double kPu = 0.10;    // CALIBRATED
-        public static final double kIu = 0;
-        public static final double kDu = 0;
+        // Values from ElevatorProfileGenerator class
+        public static final double kS = 0.01425*12.0;	 // TODO not CALIBRATED.  kS = (desired-output-volts)
+        public static final double kV = 0.0142*12.0*kElevEncoderInchesPerTick;  // TODO not CALIBRATED was 0.0149 week 1.  Tried 0.022 in lab, too high.  kV = (desired-output-volts) / (target-velocity-in-encoder-rps)
+        public static final double kA = 0.001*12.0*kElevEncoderInchesPerTick;   // TODO not CALIBRATED was 0.001 week 1.  Tried 0.003 in lab, too high.  kA = (desired-output-volts) / (target-accel-in-encoder-rot/sec^2)
+        public static final double kP = 0.075*12.0*kElevEncoderInchesPerTick;    // TODO not CALIBRATED.  kP = (desired-output-volts) / (error-in-encoder-rotations)
+        public static final double kI = 0;       //  kI = (desired-output-volts) * (error-in-encoder-rot * sec)
+        public static final double kD = 0;       //  kD = (desired-output-volts) / (error-in-encoder-rps)
+        public static final double kG = 0.01945*12.0;      // TODO not CALIBRATED.  kG = (desired-output-volts)
 
         // Elevator regions
         public enum ElevatorRegion {
