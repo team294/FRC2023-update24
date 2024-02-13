@@ -54,7 +54,8 @@ public class Elevator extends SubsystemBase implements Loggable{
 	private final StatusSignal<ForwardLimitValue> limitUpperSignal = elevatorMotor.getForwardLimit();	// Forward limit switch
 	private final StatusSignal<ReverseLimitValue> limitLowerSignal = elevatorMotor.getReverseLimit();	// Reverse limit switch
 
-	private final ElevatorProfileGenerator elevatorProfile;
+	// TODO Delete elevatorProfile
+	// private final ElevatorProfileGenerator elevatorProfile;
 
 	private boolean elevCalibrated = false; // true is encoder is working and calibrated, false is not calibrated
 	private boolean elevPosControl = false; // true is in position control mode (motion profile), false is manual motor control (percent output)
@@ -67,8 +68,9 @@ public class Elevator extends SubsystemBase implements Loggable{
 		this.wrist = wrist;								// Save the wrist subsystem (so elevator can get wrist status)
 		wrist.saveElevatorObject(this);					// Pass elevator subsystem to wrist (so wrist can get elevator status)
 
+		// TODO Delete elevatorProfile
 		// create elevator motion profile object (do this first, used in "checkAndZeroElevatorEnc")
-		elevatorProfile = new ElevatorProfileGenerator(this, log);	
+		// elevatorProfile = new ElevatorProfileGenerator(this, log);	
 
 		// Start with factory default TalonFX configuration
 		elevatorMotorConfig = new TalonFXConfiguration();			// Factory default configuration
@@ -190,7 +192,9 @@ public class Elevator extends SubsystemBase implements Loggable{
 	 */
 	public void setElevatorMotorPercentOutput(double percentOutput) {
 		elevPosControl = false;
-		elevatorProfile.disableProfileControl();
+
+		// TODO delete elevatorProfile
+		// elevatorProfile.disableProfileControl();
 
 		// Clamp speed depending on calibration
 		if (elevCalibrated) {
@@ -234,14 +238,17 @@ public class Elevator extends SubsystemBase implements Loggable{
 				pos = ElevatorConstants.boundBottomMain;
 			}
 
-			// TODO 
-			// elevatorMotor.setControl(elevatorMMControl.withPosition(pos/ElevatorConstants.kElevEncoderInchesPerTick));			// Calculated desired position in encoder rotations
-			elevatorProfile.setProfileTarget(pos);
+			// TODO delete elevatorProfile
+			// elevatorProfile.setProfileTarget(pos);
+			elevatorMotor.setControl(elevatorMMControl.withPosition(pos/ElevatorConstants.kElevEncoderInchesPerTick));			// Calculated desired position in encoder rotations
 
-			log.writeLog(false, subsystemName, "setProfileTarget", "Target", pos, "Allowed,Yes,Wrist Angle",
+			SmartDashboard.putNumber("ElevatorInitPos", getElevatorPos());
+			SmartDashboard.putNumber("ElevatorTarget", pos);
+	
+			log.writeLog(false, subsystemName, "setProfileTarget", "Cur pos", getElevatorPos(), "Target", pos, "Allowed,Yes,Wrist Angle",
 			   wrist.getWristAngle(), "Wrist Target", wrist.getCurrentWristTarget());
 		} else {
-			log.writeLog(false, subsystemName, "setProfileTarget", "Target", pos, "Allowed,No,Wrist Angle",
+			log.writeLog(false, subsystemName, "setProfileTarget", "Cur pos", getElevatorPos(), "Target", pos, "Allowed,No,Wrist Angle",
  			  wrist.getWristAngle(), "Wrist Target", wrist.getCurrentWristTarget());
 		}
 	}
@@ -257,7 +264,10 @@ public class Elevator extends SubsystemBase implements Loggable{
 		if (elevCalibrated) {
 			if (elevPosControl) {
 				// Motion profile control
-				return elevatorProfile.getFinalPosition();
+				return elevatorMMControl.Position*ElevatorConstants.kElevEncoderInchesPerTick;
+
+				// TODO delete elevatorProfile
+				// return elevatorProfile.getFinalPosition();
 			} else {
 				// Manual control mode
 				return getElevatorPos();
@@ -424,7 +434,17 @@ public class Elevator extends SubsystemBase implements Loggable{
 		// Note:  If we are using our motion profile control loop, then set the power directly using setElevatorMotorPercentOutputDirect().
 		// Do not call setElevatorMotorPercentOutput(), since that will change the elevPosControl to false (manual control).
 		if (elevPosControl) {
-			setElevatorMotorPercentOutputDirect(elevatorProfile.trackProfilePeriodic());
+			// TODO delete elevatorProfile
+			// setElevatorMotorPercentOutputDirect(elevatorProfile.trackProfilePeriodic());
+
+			// TODO if elevator is moving (not within tolerance of target position, then log similar to this)
+			// log.writeLog(logWhenDisabled, "ElevatorProfile", "updateCalc",
+			// 	"MP Pos", getCurrentPosition(), "ActualPos", elevator.getElevatorPos(), 
+			// 	"TargetPos", finalPosition, "Time since start", getTimeSinceProfileStart(), "dt", dt,
+			// 	"ActualVel", elevator.getElevatorVelocity(),
+			// 	"MP Vel", (currentMPVelocity * directionSign),
+			// 	"MP Accel", (currentMPAcceleration * directionSign),
+			// 	"PowerFF", percentPowerFF, "PowerFB", percentPowerFB );
 		}
 
 		// If in manual drive mode, 
