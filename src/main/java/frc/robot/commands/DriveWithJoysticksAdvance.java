@@ -165,7 +165,7 @@ public class DriveWithJoysticksAdvance extends Command {
    * @return Scaled joystick value, -1.0 to +1.0
    */
   private double scaleTurn(double rawJoystick){
-    return Math.signum(rawJoystick)*(0.6801 * rawJoystick * rawJoystick + 0.3232 * Math.abs(rawJoystick) - 0.0033);
+    return Math.signum(rawJoystick)*(0.7801 * rawJoystick * rawJoystick + 0.2232 * Math.abs(rawJoystick) - 0.0033);
   }
 
   /**
@@ -176,7 +176,7 @@ public class DriveWithJoysticksAdvance extends Command {
    * @return Scaled joystick value, -1.0 to +1.0
    */
   private double scaleJoystick(double rawJoystick){
-    return Math.signum(rawJoystick)*(0.7912*rawJoystick*rawJoystick + 0.2109*Math.abs(rawJoystick) - 0.0022);
+    return Math.signum(rawJoystick)*(0.8912*rawJoystick*rawJoystick + 0.1109*Math.abs(rawJoystick) - 0.0022);
   }
 }
 

@@ -632,7 +632,7 @@ public class DriveTrain extends SubsystemBase implements Loggable {
   }  
 
   public void cameraInit() {
-    camera.init();
+    // camera.init();
   }
 
 }
