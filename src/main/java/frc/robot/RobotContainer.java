@@ -8,6 +8,7 @@ import java.util.List;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.trajectory.TrajectoryGenerator;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.GenericHID;
@@ -42,6 +43,7 @@ import frc.robot.subsystems.*;
 // import frc.robot.triggers.*;
 import frc.robot.utilities.*;
 import frc.robot.utilities.TrajectoryCache.TrajectoryFacing;
+import frc.robot.utilities.TrajectoryCache.TrajectoryType;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -115,8 +117,7 @@ public class RobotContainer {
     SmartDashboard.putData("Drive Straight", new DriveStraight(false, false, false, driveTrain, log));
     SmartDashboard.putData("Drive Lock Wheels", new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log));
 
-    // Testing for trajectories
-    Rotation2d rotationFront = new Rotation2d();          // Facing away from drivers
+    // Testing for DriveToPose
     SmartDashboard.putData("Drive To Pose", new DriveToPose(driveTrain, log));
     SmartDashboard.putData("Drive To Pose Test", new DriveToPose(new Pose2d(1, 1, Rotation2d.fromDegrees(0)), driveTrain, log));
     // SmartDashboard.putData("Drive To Pose Test", new Pose2d(16.17878-1.7, 6.749796-0.25, new Rotation2d(0), driveTrain, log));
@@ -124,27 +125,36 @@ public class RobotContainer {
       SwerveConstants.kNominalSpeedMetersPerSecond, SwerveConstants.kNominalAccelerationMetersPerSecondSquare,
       TrajectoryConstants.maxPositionErrorMeters, TrajectoryConstants.maxThetaErrorDegrees, driveTrain, log));
     SmartDashboard.putData("Drive to Load Station", new DriveToLoad(driveTrain, wrist, elevator, manipulator, intake, field, log));
-    // SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
-    //     trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
-    // SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
-    //     trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
-    // SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
-    //     trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
-    SmartDashboard.putData("Drive Trajectory Straight", new DriveTrajectory(
+    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
+
+    // Testing for trajectories
+    Rotation2d rotationFront = new Rotation2d();          // Facing away from drivers
+    SmartDashboard.putData("Drive Trajectory Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Curve Relative", new DriveTrajectory(CoordType.kRelative, StopType.kBrake, 
+        trajectoryCache.cache[TrajectoryType.testCurve.value], driveTrain, log));
+    SmartDashboard.putData("Drive Trajectory Absolute", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
+        trajectoryCache.cache[TrajectoryType.test.value], driveTrain, log));  
+    SmartDashboard.putData("Drive Trajectory S-Fwd Relative", new DriveTrajectory(
           CoordType.kRelative, StopType.kBrake,
-          new TrajectoryFacing(rotationFront, rotationFront, 
-            TrajectoryGenerator.generateTrajectory(
-              new Pose2d(0,0,new Rotation2d(0)), 
-              List.of(), 
-              new Pose2d(1.0,0,new Rotation2d(0)), 
-              Constants.TrajectoryConstants.swerveTrajectoryConfig
+          new TrajectoryFacing(rotationFront, rotationFront,
+            TrajectoryCache.calcTrajectory( "S-Fwd", 0.4, 0.4,
+              new Pose2d(0, 0, new Rotation2d(0)), 
+              List.of(
+                new Translation2d(1.0, 0.5),
+                new Translation2d(2.0, -0.5)
+              ), 
+              new Pose2d(3.0, 0, new Rotation2d(0)), 
+              log
             )
           ),
           driveTrain, log));
-    SmartDashboard.putData("Drive to closest goal", new DriveToPose(() -> field.getInitialColumn(field.getClosestGoal(driveTrain.getPose(), manipulator.getPistonCone())), driveTrain, log));
+
+    // Testing for balancing
     // SmartDashboard.putData("Drive Smart Balance", new SequentialCommandGroup(new ResetPose,new SmartBalance(0.5, 0, driveTrain)));
     // SmartDashboard.putData("Test Balance", new SequentialCommandGroup(new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, .889, driveTrain, log), new ActiveBalance(driveTrain, log)));
     SmartDashboard.putData("Test Balance", new ActiveBalance(driveTrain, log));
+
     // Testing for autos
     // SmartDashboard.putData("Example Auto S-Shape", new ExampleAuto(driveTrain));
     // SmartDashboard.putData("Center Balance Blue", new DriveTrajectory(CoordType.kAbsolute, StopType.kBrake, 
