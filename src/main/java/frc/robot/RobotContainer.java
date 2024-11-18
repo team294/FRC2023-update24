@@ -6,6 +6,8 @@ package frc.robot;
 
 import java.util.List;
 
+import com.choreo.lib.Choreo;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -149,7 +151,6 @@ public class RobotContainer {
             )
           ),
           driveTrain, log));
-
     // Testing for balancing
     // SmartDashboard.putData("Drive Smart Balance", new SequentialCommandGroup(new ResetPose,new SmartBalance(0.5, 0, driveTrain)));
     // SmartDashboard.putData("Test Balance", new SequentialCommandGroup(new DriveUpChargingStation(-TrajectoryConstants.ChargeStationVelocity, .889, driveTrain, log), new ActiveBalance(driveTrain, log)));

@@ -6,6 +6,9 @@ package frc.robot.utilities;
 
 import java.util.List;
 
+import com.choreo.lib.Choreo;
+import com.choreo.lib.ChoreoTrajectory;
+
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -25,6 +28,7 @@ public class TrajectoryCache {
    
     private static int trajectoryCount = 2;
     public TrajectoryFacing[] cache = new TrajectoryFacing[trajectoryCount];        // array of trajectories
+    public ChoreoTrajectory TestingTrajectory = Choreo.getTrajectory("");
 
     public enum TrajectoryType {
         test(0),
