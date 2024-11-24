@@ -5,6 +5,10 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -27,23 +31,25 @@ import frc.robot.subsystems.*;
  */
 public class AutoSelection {
 
-	public static final int NONE = 0;
-	public static final int CONE_LEAVE_NEAR_WALL = 1;
-	public static final int SCORE_CONE = 2;
-	public static final int CONE_BALANCE_4TOWALL = 3;
-	public static final int BALANCE_4TOWALL = 4;
-	public static final int CONE_LEAVE_NEAR_WALL_CROSS = 5;
-	public static final int CONE_LEAVE_NEAR_WALL_BALANCE = 6;
-	public static final int CONE_LEAVE_NEAR_LOAD_BALANCE = 7;
-	public static final int CONE_LEAVE_NEAR_WALL_PICK_UP_CUBE = 8;
-	public static final int CONE_LEAVE_NEAR_LOAD_PICK_UP_CUBE = 9;
-	public static final int CONE_LEAVE_NEAR_LOAD_PICK_UP_BALANCE = 10;
-	public static final int CONE_LEAVE_NEAR_WALL_PICK_UP_BALANCE = 11;
-	public static final int CONE_MOBILITY_BALANCE_4TOWALL = 12;
-	public static final int CONE_PICK_UP_CUBE_BALANCE_4TOWALL = 13;
-	public static final int CONE_PICK_UP_CUBE_SCORE_BALANCE_4TOWALL = 14;
-	public static final int CONE_PICK_UP_CUBE_BALANCE_BARF_4TOWALL = 15;
-	// 	public static final int LEAVE_COMMUNITY = 2;
+	
+	public static final HashMap<String, Integer> AUTO_SELECTION_OPTIONS = new HashMap<String, Integer>(Map.ofEntries(
+		Map.entry("Cone Leave NearWall", 1),
+		Map.entry("Score Cone", 2),
+		Map.entry("Cone Balance 4ToWall", 3),
+		Map.entry("Balance 4ToWall", 4),
+		Map.entry("Cone Nearwall Cross", 5),
+		Map.entry("Cone Nearwall Balance", 6),
+		Map.entry("Cone Near Load Balance", 7),
+		Map.entry("Cone Leave Near Wall pick up cube", 8),
+		Map.entry("Cone Leave Near Load pick up cube", 9),
+		Map.entry("Cone Leave Near Load Pick Up Balance", 10),
+		Map.entry("Cone Leave Near Wall Pick Up Balance", 11),
+		Map.entry("Cone Mobility Balance 4ToWall", 12),
+		Map.entry("Cone Pick Up Cube Balance 4ToWall", 13),
+		Map.entry("Cone Pick Up Cube Score Balance 4ToWall", 14),
+		Map.entry("Cone Pick Up Cube Balance Barf 4ToWall", 15)
+	));
+
 
 	private final AllianceSelection allianceSelection;
 	private final TrajectoryCache trajectoryCache;
@@ -60,23 +66,10 @@ public class AutoSelection {
 		this.field = field;
 
 		// auto selections
-		autoChooser.setDefaultOption("None", NONE);
-		autoChooser.addOption("Score Cone", SCORE_CONE);
-		autoChooser.addOption("Cone Leave NearWall", CONE_LEAVE_NEAR_WALL);
-		autoChooser.addOption("Cone Balance 4ToWall", CONE_BALANCE_4TOWALL);
-		autoChooser.addOption("Balance 4ToWall", BALANCE_4TOWALL);
-		autoChooser.addOption("Cone Nearwall Cross", CONE_LEAVE_NEAR_WALL_CROSS);
-		autoChooser.addOption("Cone Nearwall Balance", CONE_LEAVE_NEAR_WALL_BALANCE);
-		autoChooser.addOption("Cone Near Load Balance", CONE_LEAVE_NEAR_LOAD_BALANCE);
-		autoChooser.addOption("Cone Leave Near Wall pick up cube", CONE_LEAVE_NEAR_WALL_PICK_UP_CUBE);
-		autoChooser.addOption("Cone Leave Near Load pick up cube", CONE_LEAVE_NEAR_LOAD_PICK_UP_CUBE);
-		autoChooser.addOption("Cone Leave Near Wall Pick Up Balance", CONE_LEAVE_NEAR_WALL_PICK_UP_BALANCE);
-		autoChooser.addOption("Cone Leave Near Load Pick Up Balance", CONE_LEAVE_NEAR_LOAD_PICK_UP_BALANCE);
-		autoChooser.addOption("Cone Mobility Balance 4ToWall", CONE_MOBILITY_BALANCE_4TOWALL);
-		autoChooser.addOption("Cone Pick Up Cube Balance 4ToWall", CONE_PICK_UP_CUBE_BALANCE_4TOWALL);
-		autoChooser.addOption("Cone Pick Up Cube Score Balance 4ToWall", CONE_PICK_UP_CUBE_SCORE_BALANCE_4TOWALL);
-		autoChooser.addOption("Cone Pick Up Cube Balance Barf 4ToWall", CONE_PICK_UP_CUBE_BALANCE_BARF_4TOWALL);
-
+		autoChooser.setDefaultOption("None", 0);
+		for (String name : AUTO_SELECTION_OPTIONS.keySet()) {
+			autoChooser.addOption(name, AUTO_SELECTION_OPTIONS.get(name));
+		}
 		
 		// autoChooser.addOption("Straight", STRAIGHT);
 		// autoChooser.addOption("Leave Community", LEAVE_COMMUNITY);
@@ -112,13 +105,13 @@ public class AutoSelection {
 		double waitTime = SmartDashboard.getNumber("Autonomous delay", 0);
 		waitTime = MathUtil.clamp(waitTime, 0, 15);		// make sure autoDelay isn't negative and is only active during auto
 
-		if (autoPlan == NONE) {
+		if (autoPlan == 0) {
 			// Starting position = facing drivers
 			log.writeLogEcho(true, "AutoSelect", "run None");
 			autonomousCommand = new DriveResetPose(180, false, driveTrain, log);
 		}
 
-		if (autoPlan == SCORE_CONE) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Score Cone")) {
 			// Starting position = facing drivers, against a cone scoring location
 			log.writeLogEcho(true, "AutoSelect", "run Score Cone");
 	   		autonomousCommand = new SequentialCommandGroup(
@@ -128,7 +121,7 @@ public class AutoSelection {
 	   		);
    	   	}
 
-		if (autoPlan == CONE_LEAVE_NEAR_WALL) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Leave NearWall")) {
 			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall");
 			Pose2d posScoreInitial, posLeaveFinal;
@@ -148,7 +141,7 @@ public class AutoSelection {
 	   		);
    	   	}
 
-		if (autoPlan == CONE_LEAVE_NEAR_WALL_CROSS) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Nearwall Cross")) {
 			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall Cross");
 			Pose2d posScoreInitial, posLeave, posCross, posFinal;
@@ -188,7 +181,7 @@ public class AutoSelection {
 	   		);
    	   	}
 
-		if (autoPlan == CONE_LEAVE_NEAR_WALL_BALANCE) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Nearwall Balance")) {
 			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall Balance");
 			Pose2d posScoreInitial, posLeave, posCross;
@@ -236,7 +229,7 @@ public class AutoSelection {
 			);
 		}
 
-		if (autoPlan == CONE_LEAVE_NEAR_LOAD_BALANCE) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Near Load Balance")) {
 			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Load Balance");
 			Pose2d posScoreInitial, posLeave, posCross;
@@ -282,7 +275,7 @@ public class AutoSelection {
 			);
 		}
 
-		if (autoPlan == CONE_LEAVE_NEAR_WALL_PICK_UP_CUBE) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Leave Near Wall pick up cube")) {
 			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall Pickup cube");
 			Pose2d posScoreInitial, posLeave, posLineUp, posFinal;
@@ -315,7 +308,7 @@ public class AutoSelection {
 			);
 		}
 
-		if (autoPlan == CONE_LEAVE_NEAR_LOAD_PICK_UP_CUBE) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Leave Near Load pick up cube")) {
 			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Load Pick up cube");
 			Pose2d posScoreInitial, posCube, posMidPoint, posScore, posEnd;
@@ -374,7 +367,7 @@ public class AutoSelection {
 			);
 		}
 
-		if (autoPlan == CONE_LEAVE_NEAR_WALL_PICK_UP_BALANCE) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Leave Near Wall Pick Up Balance")) {
 			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave Near Wall pickup balance");
 			Pose2d posScoreInitial, posLeave, posCross;
@@ -412,7 +405,7 @@ public class AutoSelection {
 			);
 		}
 
-		if (autoPlan == CONE_LEAVE_NEAR_LOAD_PICK_UP_BALANCE) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Leave Near Load Pick Up Balance")) {
 			// Starting position = facing drivers, against scoring position closest to wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Leave load pickup balance");
 			Pose2d posScoreInitial, posLeave, posCross;
@@ -450,7 +443,7 @@ public class AutoSelection {
 			);
 		}
 
-		if (autoPlan == CONE_BALANCE_4TOWALL) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Balance 4ToWall")) {
 			// Starting position = facing drivers, 4th scoring position from wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
 			// Pose2d posCommunityInitial = field.getStationInitial(2);
@@ -480,7 +473,7 @@ public class AutoSelection {
 				// );
    	   	}
 
-		if (autoPlan == BALANCE_4TOWALL) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Balance 4ToWall")) {
 			// Starting position = facing drivers, 4th scoring position from wall
 			log.writeLogEcho(true, "AutoSelect", "run Balance 4ToWall");
 			
@@ -506,7 +499,7 @@ public class AutoSelection {
 	   		);
    	   	}
 
-		if (autoPlan == CONE_MOBILITY_BALANCE_4TOWALL) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Mobility Balance 4ToWall")) {
 		// Starting position = facing drivers, 4th scoring position from wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
 			// Pose2d posCommunityInitial = field.getStationInitial(2);
@@ -533,7 +526,7 @@ public class AutoSelection {
 			);
 		}
 
-		if (autoPlan == CONE_PICK_UP_CUBE_BALANCE_4TOWALL) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Pick Up Cube Balance 4ToWall")) {
 			// Starting position = facing drivers, 4th scoring position from wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
 			// Pose2d posCommunityInitial = field.getStationInitial(2);
@@ -566,7 +559,7 @@ public class AutoSelection {
 			);
 		}
 
-		if (autoPlan == CONE_PICK_UP_CUBE_SCORE_BALANCE_4TOWALL) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Pick Up Cube Score Balance 4ToWall")) {
 			// Starting position = facing drivers, 4th scoring position from wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Balance 4ToWall");
 			// Pose2d posCommunityInitial = field.getStationInitial(2);
@@ -609,7 +602,7 @@ public class AutoSelection {
 			);
 		}
 
-		if (autoPlan == CONE_PICK_UP_CUBE_BALANCE_BARF_4TOWALL) {
+		if (autoPlan == AUTO_SELECTION_OPTIONS.get("Cone Pick Up Cube Balance Barf 4ToWall")) {
 			// Starting position = facing drivers, 4th scoring position from wall
 			log.writeLogEcho(true, "AutoSelect", "run Cone Pick up Cube Balance Barf 4ToWall");
 			// Pose2d posCommunityInitial = field.getStationInitial(2);
