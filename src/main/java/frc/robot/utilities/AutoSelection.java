@@ -671,7 +671,7 @@ public class AutoSelection {
 
 		if(autoPlan == CHOREO_TEST_TRAJECTORY){
 			log.writeLogEcho(true, "AutoSelect", "run choreo test trajectory");
-			testTrajectory = Choreo.getTrajectory("");
+			testTrajectory = Choreo.getTrajectory("TestPath");
 			autonomousCommand = new SequentialCommandGroup(
 				new DriveResetPose(testTrajectory.getInitialPose(), true, driveTrain, log),
 				Choreo.choreoSwerveCommand(
