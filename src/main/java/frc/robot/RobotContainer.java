@@ -7,6 +7,7 @@ package frc.robot;
 import java.util.List;
 
 import com.choreo.lib.Choreo;
+import com.choreo.lib.ChoreoTrajectory;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -81,6 +82,7 @@ public class RobotContainer {
   private final CommandXboxController xboxController = new CommandXboxController(OIConstants.usbXboxController);
   private boolean rumbling = false;
   private boolean lastEnabledModeAuto = false;    // True if the last mode was auto
+
 
   // Set to this pattern when the robot is disabled
   private final Command patternTeamMoving = new LEDSetPattern(LED.teamMovingColorsLibrary, 0, 60, led, log);
