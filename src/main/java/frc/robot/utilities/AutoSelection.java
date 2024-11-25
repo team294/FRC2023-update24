@@ -5,12 +5,21 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
+
+import com.choreo.lib.Choreo;
+import com.choreo.lib.ChoreoControlFunction;
+import com.choreo.lib.ChoreoTrajectory;
+import com.choreo.lib.ChoreoTrajectoryState;
+
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants;
 import frc.robot.Constants.CoordType;
 import frc.robot.Constants.SwerveConstants;
 import frc.robot.Constants.TrajectoryConstants;
@@ -43,6 +52,7 @@ public class AutoSelection {
 	public static final int CONE_PICK_UP_CUBE_BALANCE_4TOWALL = 13;
 	public static final int CONE_PICK_UP_CUBE_SCORE_BALANCE_4TOWALL = 14;
 	public static final int CONE_PICK_UP_CUBE_BALANCE_BARF_4TOWALL = 15;
+	public static final int CHOREO_TEST_TRAJECTORY = 16;
 	// 	public static final int LEAVE_COMMUNITY = 2;
 
 	private final AllianceSelection allianceSelection;
@@ -76,6 +86,8 @@ public class AutoSelection {
 		autoChooser.addOption("Cone Pick Up Cube Balance 4ToWall", CONE_PICK_UP_CUBE_BALANCE_4TOWALL);
 		autoChooser.addOption("Cone Pick Up Cube Score Balance 4ToWall", CONE_PICK_UP_CUBE_SCORE_BALANCE_4TOWALL);
 		autoChooser.addOption("Cone Pick Up Cube Balance Barf 4ToWall", CONE_PICK_UP_CUBE_BALANCE_BARF_4TOWALL);
+		autoChooser.addOption("Choreo Test Trajectory", CHOREO_TEST_TRAJECTORY);
+
 
 		
 		// autoChooser.addOption("Straight", STRAIGHT);
@@ -107,6 +119,7 @@ public class AutoSelection {
 		// Get parameters from Shuffleboard
 		int autoPlan = autoChooser.getSelected();
 		log.writeLogEcho(true, "AutoSelect", "autoPlan",autoPlan);
+		ChoreoTrajectory testTrajectory;
 
 
 		double waitTime = SmartDashboard.getNumber("Autonomous delay", 0);
@@ -653,6 +666,31 @@ public class AutoSelection {
 				new FileLogEnableFastLogging(false, driveTrain, log),
 				new DriveToPose(CoordType.kRelative, 0.5, driveTrain, log)	
 				
+			);
+		}
+
+		if(autoPlan == CHOREO_TEST_TRAJECTORY){
+			log.writeLogEcho(true, "AutoSelect", "run choreo test trajectory");
+			testTrajectory = Choreo.getTrajectory("");
+			autonomousCommand = new SequentialCommandGroup(
+				new DriveResetPose(testTrajectory.getInitialPose(), true, driveTrain, log),
+				Choreo.choreoSwerveCommand(
+					testTrajectory,
+					() -> driveTrain.getPose(), 
+					Choreo.choreoSwerveController(
+						new PIDController(Constants.TrajectoryConstants.kPXController, 0.0, 0.0), 
+						new PIDController(Constants.TrajectoryConstants.kPYController, 0.0, 0.0), 
+						new PIDController(Constants.TrajectoryConstants.kPThetaController, 0.0, 0.0)
+					), 
+					(ChassisSpeeds speeds) -> driveTrain.drive(
+						speeds.vxMetersPerSecond, 
+						speeds.vyMetersPerSecond, 
+						speeds.omegaRadiansPerSecond, 
+						false, 
+						false
+					), 
+					() -> false,
+					driveTrain)
 			);
 		}
 
