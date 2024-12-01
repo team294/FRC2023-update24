@@ -677,10 +677,12 @@ public class AutoSelection {
 				Choreo.choreoSwerveCommand(
 					testTrajectory,
 					() -> driveTrain.getPose(), 
-					Choreo.choreoSwerveController(
+					BCRChoreoController.BCRChoreoSwerveController(
 						new PIDController(Constants.TrajectoryConstants.kPXController, 0.0, 0.0), 
 						new PIDController(Constants.TrajectoryConstants.kPYController, 0.0, 0.0), 
-						new PIDController(Constants.TrajectoryConstants.kPThetaController, 0.0, 0.0)
+						new PIDController(Constants.TrajectoryConstants.kPThetaController, 0.0, 0.0),
+						driveTrain,
+						log
 					), 
 					(ChassisSpeeds speeds) -> driveTrain.drive(
 						speeds.vxMetersPerSecond, 
