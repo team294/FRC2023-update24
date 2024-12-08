@@ -684,13 +684,16 @@ public class AutoSelection {
 						driveTrain,
 						log
 					), 
-					(ChassisSpeeds speeds) -> driveTrain.drive(
-						speeds.vxMetersPerSecond, 
-						speeds.vyMetersPerSecond, 
-						speeds.omegaRadiansPerSecond, 
-						false, 
-						false
-					), 
+					(ChassisSpeeds speeds) -> driveTrain.setModuleStates(
+						Constants.DriveConstants.kDriveKinematics.toSwerveModuleStates(speeds), false
+					),
+					// driveTrain.drive(
+					// 	speeds.vxMetersPerSecond, 
+					// 	speeds.vyMetersPerSecond, 
+					// 	speeds.omegaRadiansPerSecond, 
+					// 	false, 
+					// 	false
+					// ), 
 					() -> false,
 					driveTrain)
 			);
